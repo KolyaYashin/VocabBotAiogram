@@ -1,0 +1,5 @@
+venv
+constant.py
+__pycache__/
+words.db
+query.sql
