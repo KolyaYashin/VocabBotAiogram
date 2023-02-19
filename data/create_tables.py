@@ -1,8 +1,8 @@
 import sqlite3
-from constant import MY_ID_TELEGRAM
+from data.constant import MY_ID_TELEGRAM
 
-dp = sqlite3.connect('data/words.db')
-sql = dp.cursor()
+db = sqlite3.connect('data/words.db')
+sql = db.cursor()
 
 sql.execute("""CREATE TABLE IF NOT EXISTS words (
                 id INT,
@@ -29,6 +29,6 @@ sql.execute("""CREATE TABLE IF NOT EXISTS users (
                 )""")
 
 
-dp.commit()
-
-dp.close()
+db.commit()
+sql.close()
+db.close()
