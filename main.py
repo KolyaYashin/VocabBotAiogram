@@ -1,7 +1,7 @@
 from aiogram import Bot, Dispatcher
 from data.constant import BOT_TOKEN, MY_ID_TELEGRAM
 from aiogram.types import Message, BotCommand
-from aiogram.filters import Command
+from aiogram.filters import Text,Command
 import filters as f
 from aiogram import F
 import data.create_tables as tables
@@ -11,12 +11,9 @@ bot = Bot(BOT_TOKEN)
 dp = Dispatcher()
 admin_ids = [MY_ID_TELEGRAM]
 
-@dp.message(Command(commands=['start']))
-async def proccess_start(message: Message):
-    db = tables.sqlite3.connect('data/words.db')
-    sql = db.cursor()
-    if message.from_user.id not in users.user_data:
-        users.user_data[message.from_user.id]={
+def create_empty_user(user_id: int):
+    if user_id not in users.user_data:
+        users.user_data[user_id]={
             'en':'',
             'ru':'',
             'tag':'',
@@ -25,6 +22,12 @@ async def proccess_start(message: Message):
             'words_in_test':5,
             'include_tag': 1
         }
+
+@dp.message(Command(commands=['start']))
+async def proccess_start(message: Message):
+    db = tables.sqlite3.connect('data/words.db')
+    sql = db.cursor()
+    create_empty_user(message.from_user.id)
     user_id = message.from_user.id
     count = sql.execute(f'SELECT COUNT(*) FROM users WHERE user_id={user_id}')
     if next(count)[0]==0:
@@ -38,7 +41,17 @@ async def proccess_start(message: Message):
 async def proccess_help(message: Message):
     await message.answer('Список команд ...')
 
+@dp.message(Command(commands = ['stop']))
+async def proccess_stop(message: Message):
+    user_id = message.from_user.id
+    create_empty_user(user_id)
+    users.user_data[user_id] = 'in_menu'
 
+@dp.message(Command(commands = ['menu']))
+async def proccess_menu(message: Message):
+    user_id = message.from_user.id
+    create_empty_user(user_id)
+    users.user_data[user_id] = 'in_menu'
 
 @dp.message( F.text.startswith('/admin'),f.IsAdmin(admin_ids))
 async def proccess_admin(message: Message, text: str):
@@ -61,11 +74,57 @@ async def proccess_admin(message: Message, text: str):
     sql.close()
     db.close()
 
+@dp.message(Command(commands=['tag']), f.InSettings(users.user_data))
+async def proccess_change_incl_tag(message: Message):
+    await message.answer('Хочешь ли ты при добавлении нового слова писать его тэг? (напиши да/нет)')
 
-@dp.message(Command(commands=['setting']))
+
+
+
+
+@dp.message(Text(text='да'), f.InSettings(users.user_data))
+async def proccess_yes_incl_tag(message: Message):
+    print('im here xd')
+    user_id = message.from_user.id
+    db = tables.sqlite3.connect('data/words.db')
+    sql = db.cursor()
+    users.user_data[user_id]['include_tag'] = 1
+    sql.execute(f'UPDATE users SET include_tag = 1 WHERE user_id = {user_id}')
+    db.commit()
+    await message.answer(f'{users.user_data[user_id]["include_tag"]}, {users.user_data[user_id]["words_in_test"]}')
+    sql.close()
+    db.close()
+    users.user_data[user_id]['state'] = 'in_menu'
+
+
+@dp.message(Text(text='нет'), f.InSettings(users.user_data))
+async def proccess_no_incl_tag(message: Message):
+    print('im here')
+    user_id = message.from_user.id
+    db = tables.sqlite3.connect('data/words.db')
+    sql = db.cursor()
+    users.user_data[user_id]['include_tag'] = 0
+    sql.execute(f'UPDATE users SET include_tag = 0 WHERE user_id = {user_id}')
+    db.commit()
+    await message.answer(f'{users.user_data[user_id]["include_tag"]}, {users.user_data[user_id]["words_in_test"]}')
+    sql.close()
+    db.close()
+    users.user_data[user_id]['state'] = 'in_menu'
+
+
+
+@dp.message(Command(commands=['settings']))
 async def proccess_settings(message: Message):
-    await message.answer('Ты можешь изменить  количество слов в тесте'
-        'изначально - 5')
+    await message.answer('Ты можешь изменить количество слов, которое будет в тестах. \n'
+                        'А также добавлять ли тэг в новые слова (если выключено, у новых слов будет стандартный тэг default).'
+                        '\nВернуться в меню - /menu')
+    user_id = message.from_user.id
+    create_empty_user(user_id)
+    if users.user_data[user_id]['include_tag']:
+        await message.answer(f'{users.user_data[user_id]["include_tag"]}, {users.user_data[user_id]["words_in_test"]}')
+    users.user_data[user_id]['state'] = 'in_settings'
+
+
 
 
 @dp.message(Command(commands=['add']))
@@ -137,9 +196,6 @@ async def proccess_add_tag(message: Message):
     db.close()
     await message.answer(f'Слово {users.user_data[user_id]["en"]} успешно добавлено!')
     users.user_data[user_id]['state'] = 'in_menu'
-
-
-
 
 
 async def set_main_menu(bot: Bot):
