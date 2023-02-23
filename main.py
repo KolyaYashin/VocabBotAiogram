@@ -84,7 +84,6 @@ async def proccess_change_incl_tag(message: Message):
 
 @dp.message(Text(text='да'), f.InSettings(users.user_data))
 async def proccess_yes_incl_tag(message: Message):
-    print('im here xd')
     user_id = message.from_user.id
     db = tables.sqlite3.connect('data/words.db')
     sql = db.cursor()
@@ -99,7 +98,6 @@ async def proccess_yes_incl_tag(message: Message):
 
 @dp.message(Text(text='нет'), f.InSettings(users.user_data))
 async def proccess_no_incl_tag(message: Message):
-    print('im here')
     user_id = message.from_user.id
     db = tables.sqlite3.connect('data/words.db')
     sql = db.cursor()
@@ -120,9 +118,17 @@ async def proccess_settings(message: Message):
                         '\nВернуться в меню - /menu')
     user_id = message.from_user.id
     create_empty_user(user_id)
-    if users.user_data[user_id]['include_tag']:
-        await message.answer(f'{users.user_data[user_id]["include_tag"]}, {users.user_data[user_id]["words_in_test"]}')
+    db = tables.sqlite3.connect('data/words.db')
+    sql = db.cursor()
+    query = next(sql.execute(f'SELECT set_test_words AS words, include_tag AS tag FROM users WHERE user_id = {user_id}'))
+    print(query)
+    users.user_data[user_id]['include_tag'] = bool(query[1])
+    users.user_data[user_id]['words_in_test'] = int(query[0])
+    await message.answer(f'{users.user_data[user_id]["include_tag"]}, {users.user_data[user_id]["words_in_test"]}')
     users.user_data[user_id]['state'] = 'in_settings'
+    sql.close()
+    db.close()
+
 
 
 
@@ -132,17 +138,9 @@ async def proccess_add(message: Message):
     db = tables.sqlite3.connect('data/words.db')
     sql = db.cursor()
     user_id = message.from_user.id
+    create_empty_user(user_id)
     incl_tag = next(sql.execute(f"SELECT include_tag FROM users WHERE user_id={user_id}"))[0]
-    if user_id not in users.user_data:
-        users.user_data[user_id] = {
-            'en':'',
-            'ru':'',
-            'tag':'',
-            'score':0,
-            'state':'in_menu',
-            'words_in_test':5,
-            'include_tag': incl_tag
-        }
+    users.user_data[user_id]['include_tag'] = bool(incl_tag)
 
     users.user_data[user_id]['state']='in_add_en'
     await message.answer('Введите слово на английском')
@@ -170,14 +168,16 @@ async def proccess_add_ru(message: Message):
         db = tables.sqlite3.connect('data/words.db')
         sql = db.cursor()
         rows_count = next(sql.execute("SELECT COUNT(*) FROM words"))[0]
-        sql.execute(f'INSERT INTO words VALUES ({rows_count+1}, {user_id}, {users.user_data[user_id]["en"]}), '
-                    f'{users.user_data[user_id]["ru"]}, {users.user_data[user_id]["tag"]}, DATE("now", "localtime"), '
-                    'DATE("now", "localtime"), 0, 0, 0, 1)')
+        sql.execute(f'INSERT INTO words VALUES ({rows_count+1}, {user_id}, "{users.user_data[user_id]["en"]}", '
+                f'"{users.user_data[user_id]["ru"]}", "{users.user_data[user_id]["tag"]}", DATE("now", "localtime"), '
+                'DATE("now", "localtime"), 0, 0, 0, 1)')
         db.commit()
         sql.close()
         db.close()
-        await message.answer(f'Слово {users.user_data[user_id]["en"]} успешно добавлено!')
-        users.user_data[user_id]['state'] = 'in_menu'
+        await message.answer(f'Слово {users.user_data[user_id]["en"]}, {users.user_data[user_id]["ru"]},'
+                            f' {users.user_data[user_id]["tag"]} успешно добавлено!')
+        await message.answer('Вы можете либо добавить следующее слово, либо нажать на /menu')
+        users.user_data[user_id]['state'] = 'in_add_en'
 
 
 @dp.message(F.text, f.InAddTag(users.user_data))
@@ -194,8 +194,10 @@ async def proccess_add_tag(message: Message):
     db.commit()
     sql.close()
     db.close()
-    await message.answer(f'Слово {users.user_data[user_id]["en"]} успешно добавлено!')
-    users.user_data[user_id]['state'] = 'in_menu'
+    await message.answer(f'Слово {users.user_data[user_id]["en"]}, {users.user_data[user_id]["ru"]}, '
+                        f'{users.user_data[user_id]["tag"]} успешно добавлено!')
+    await message.answer('Вы можете либо добавить следующее слово, либо нажать на /menu')
+    users.user_data[user_id]['state'] = 'in_add_en'
 
 
 async def set_main_menu(bot: Bot):
