@@ -1,6 +1,8 @@
-from aiogram.types import KeyboardButton, Message, ReplyKeyboardMarkup, ReplyKeyboardRemove
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
 
-button_yes = KeyboardButton(text='Да ✅')
-button_no = KeyboardButton(text='Нет ❌')
+button_yes = InlineKeyboardButton(text='Да ✅', callback_data='yes_pressed')
+button_no = InlineKeyboardButton(text='Нет ❌', callback_data='no_pressed')
 
-keyboard_settings = ReplyKeyboardMarkup(keyboard=[[button_yes,button_no]], resize_keyboard=True)
+
+
+keyboard_settings = InlineKeyboardMarkup(inline_keyboard=[[button_yes,button_no]])

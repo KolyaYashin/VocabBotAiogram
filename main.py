@@ -1,12 +1,13 @@
 from aiogram import Bot, Dispatcher
 from data.constant import BOT_TOKEN, MY_ID_TELEGRAM
-from aiogram.types import Message, BotCommand
+from aiogram.types import Message, BotCommand, CallbackQuery
 from aiogram.filters import Text,Command
 import filters as f
 from aiogram import F
 import data.create_tables as tables
 import data.user_session as users
 import keyboard.buttons as buttons
+
 
 bot = Bot(BOT_TOKEN)
 dp = Dispatcher()
@@ -91,10 +92,34 @@ async def proccess_change_incl_tag(message: Message):
                         reply_markup=buttons.keyboard_settings)
 
 
+@dp.callback_query(Text(text=['yes_pressed']))
+async def proccess_button_yes_press(callback: CallbackQuery):
+    user_id = callback.from_user.id
+    db = tables.sqlite3.connect('data/words.db')
+    sql = db.cursor()
+    users.user_data[user_id]['include_tag'] = 1
+    sql.execute(f'UPDATE users SET include_tag = 1 WHERE user_id = {user_id}')
+    db.commit()
+    await callback.message.answer(f'{users.user_data[user_id]["include_tag"]}, {users.user_data[user_id]["words_in_test"]}')
+    sql.close()
+    db.close()
+    users.user_data[user_id]['state'] = 'in_menu'
+
+@dp.callback_query(Text(text=['no_pressed']))
+async def proccess_button_yes_press(callback: CallbackQuery):
+    user_id = callback.from_user.id
+    db = tables.sqlite3.connect('data/words.db')
+    sql = db.cursor()
+    users.user_data[user_id]['include_tag'] = 0
+    sql.execute(f'UPDATE users SET include_tag = 0 WHERE user_id = {user_id}')
+    db.commit()
+    await callback.mesage.answer(f'{users.user_data[user_id]["include_tag"]}, {users.user_data[user_id]["words_in_test"]}')
+    sql.close()
+    db.close()
+    users.user_data[user_id]['state'] = 'in_menu'
 
 
-
-@dp.message(Text(text='Да ✅'), f.InSettings(users.user_data))
+@dp.message(Text(text=['да ✅','yes', 'да'], ignore_case=True), f.InSettings(users.user_data))
 async def proccess_yes_incl_tag(message: Message):
     user_id = message.from_user.id
     db = tables.sqlite3.connect('data/words.db')
@@ -108,7 +133,7 @@ async def proccess_yes_incl_tag(message: Message):
     users.user_data[user_id]['state'] = 'in_menu'
 
 
-@dp.message(Text(text='Нет ❌'), f.InSettings(users.user_data))
+@dp.message(Text(text=['нет ❌', 'нет', 'no'], ignore_case=True), f.InSettings(users.user_data))
 async def proccess_no_incl_tag(message: Message):
     user_id = message.from_user.id
     db = tables.sqlite3.connect('data/words.db')
@@ -153,8 +178,7 @@ async def proccess_add(message: Message):
     create_empty_user(user_id)
     incl_tag = next(sql.execute(f"SELECT include_tag FROM users WHERE user_id={user_id}"))[0]
     print()
-    users.user_data[user_id]['include_tag'] = bool(incl_tag)
-
+    users.user_data[user_id]['include_tag'] = int(incl_tag)
     users.user_data[user_id]['state']='in_add_en'
     await message.answer('Введите слово на английском')
     sql.close()
