@@ -3,3 +3,6 @@ constant.py
 __pycache__/
 words.db
 query.sql
+test.py
+just_test.ipynb
+.ipynb_checkpoints/
