@@ -6,6 +6,7 @@ import filters as f
 from aiogram import F
 import data.create_tables as tables
 import data.user_session as users
+import keyboard.buttons as buttons
 
 bot = Bot(BOT_TOKEN)
 dp = Dispatcher()
@@ -82,15 +83,18 @@ async def proccess_admin(message: Message, text: str):
     sql.close()
     db.close()
 
+
+
 @dp.message(Command(commands=['tag']), f.InSettings(users.user_data))
 async def proccess_change_incl_tag(message: Message):
-    await message.answer('Хочешь ли ты при добавлении нового слова писать его тэг? (напиши да/нет)')
+    await message.answer(text = 'Хочешь ли ты при добавлении нового слова писать его тэг? (напиши да/нет)',
+                        reply_markup=buttons.keyboard_settings)
 
 
 
 
 
-@dp.message(Text(text='да'), f.InSettings(users.user_data))
+@dp.message(Text(text='Да ✅'), f.InSettings(users.user_data))
 async def proccess_yes_incl_tag(message: Message):
     user_id = message.from_user.id
     db = tables.sqlite3.connect('data/words.db')
@@ -104,7 +108,7 @@ async def proccess_yes_incl_tag(message: Message):
     users.user_data[user_id]['state'] = 'in_menu'
 
 
-@dp.message(Text(text='нет'), f.InSettings(users.user_data))
+@dp.message(Text(text='Нет ❌'), f.InSettings(users.user_data))
 async def proccess_no_incl_tag(message: Message):
     user_id = message.from_user.id
     db = tables.sqlite3.connect('data/words.db')
@@ -148,6 +152,7 @@ async def proccess_add(message: Message):
     user_id = message.from_user.id
     create_empty_user(user_id)
     incl_tag = next(sql.execute(f"SELECT include_tag FROM users WHERE user_id={user_id}"))[0]
+    print()
     users.user_data[user_id]['include_tag'] = bool(incl_tag)
 
     users.user_data[user_id]['state']='in_add_en'
@@ -210,12 +215,15 @@ async def proccess_add_tag(message: Message):
 
 async def set_main_menu(bot: Bot):
     main_menu_commands = [
+        BotCommand(command='/menu',
+            description='Открыть меню'),
         BotCommand(command='/help',
             description='Справка для бота'),
         BotCommand(command='/add',
             description='Добавить слово'),
         BotCommand(command='/settings',
             description='Настройка некоторых параметров')]
+
     await bot.set_my_commands(main_menu_commands)
 
 
