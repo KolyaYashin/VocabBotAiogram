@@ -7,7 +7,8 @@ from aiogram import F
 import data.create_tables as tables
 import data.user_session as users
 import keyboard.buttons as buttons
-
+from test import dp2, bot2
+from lexicon.lexicon_ru import LEXICON_RU
 
 bot = Bot(BOT_TOKEN)
 dp = Dispatcher()
@@ -35,7 +36,7 @@ async def proccess_start(message: Message):
     if next(count)[0]==0:
         sql.execute(f'INSERT INTO users VALUES ({user_id}, 0, 0, 0, 1000, 5, 1)')
         db.commit()
-    await message.answer('/help для справки')
+    await message.answer(LEXICON_RU['welcome'])
     sql.close()
     db.close()
 
@@ -118,33 +119,6 @@ async def proccess_button_yes_press(callback: CallbackQuery):
     db.close()
     users.user_data[user_id]['state'] = 'in_menu'
 
-
-@dp.message(Text(text=['да ✅','yes', 'да'], ignore_case=True), f.InSettings(users.user_data))
-async def proccess_yes_incl_tag(message: Message):
-    user_id = message.from_user.id
-    db = tables.sqlite3.connect('data/words.db')
-    sql = db.cursor()
-    users.user_data[user_id]['include_tag'] = 1
-    sql.execute(f'UPDATE users SET include_tag = 1 WHERE user_id = {user_id}')
-    db.commit()
-    await message.answer(f'{users.user_data[user_id]["include_tag"]}, {users.user_data[user_id]["words_in_test"]}')
-    sql.close()
-    db.close()
-    users.user_data[user_id]['state'] = 'in_menu'
-
-
-@dp.message(Text(text=['нет ❌', 'нет', 'no'], ignore_case=True), f.InSettings(users.user_data))
-async def proccess_no_incl_tag(message: Message):
-    user_id = message.from_user.id
-    db = tables.sqlite3.connect('data/words.db')
-    sql = db.cursor()
-    users.user_data[user_id]['include_tag'] = 0
-    sql.execute(f'UPDATE users SET include_tag = 0 WHERE user_id = {user_id}')
-    db.commit()
-    await message.answer(f'{users.user_data[user_id]["include_tag"]}, {users.user_data[user_id]["words_in_test"]}')
-    sql.close()
-    db.close()
-    users.user_data[user_id]['state'] = 'in_menu'
 
 
 
@@ -250,8 +224,10 @@ async def set_main_menu(bot: Bot):
 
     await bot.set_my_commands(main_menu_commands)
 
-
+@dp2.message(F.text.startwith('/start'))
+async def sttttart(message):
+    await message.answer('Hehehe')
 
 if __name__ == '__main__':
     dp.startup.register(set_main_menu)
-    dp.run_polling(bot)
+    dp.run_polling(bot2)
