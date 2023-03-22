@@ -6,4 +6,4 @@ button_no = InlineKeyboardButton(text=LEXICON_RU['no'], callback_data='no_presse
 
 
 
-keyboard_settings = InlineKeyboardMarkup(inline_keyboard=[[button_yes,button_no]])
+keyboard_yes_no = InlineKeyboardMarkup(inline_keyboard=[[button_yes,button_no]])

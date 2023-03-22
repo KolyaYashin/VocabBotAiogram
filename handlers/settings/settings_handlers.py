@@ -6,7 +6,7 @@ from lexicon.lexicon_ru import LEXICON_RU
 from aiogram.types import Message, CallbackQuery
 from aiogram import Router, F
 from data.constant import MY_ID_TELEGRAM
-from keyboard import buttons
+from keyboard.buttons import keyboard_yes_no
 
 
 admin_ids = [MY_ID_TELEGRAM]
@@ -28,7 +28,7 @@ def create_empty_user(user_id: int):
 @router.message(Command(commands=['tag']), f.InSettings(users.user_data))
 async def proccess_change_incl_tag(message: Message):
     await message.answer(text = 'Хочешь ли ты при добавлении нового слова писать его тэг? (напиши да/нет)',
-                        reply_markup=buttons.keyboard_settings)
+                        reply_markup = keyboard_yes_no)
 
 
 @router.callback_query(Text(text=['yes_pressed']))
