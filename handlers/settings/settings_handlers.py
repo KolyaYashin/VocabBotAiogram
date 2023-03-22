@@ -6,7 +6,7 @@ from lexicon.lexicon_ru import LEXICON_RU
 from aiogram.types import Message, CallbackQuery
 from aiogram import Router, F
 from data.constant import MY_ID_TELEGRAM
-from keyboard.buttons import keyboard_yes_no
+from keyboard.buttons import keyboard_yes_no_settings
 
 
 admin_ids = [MY_ID_TELEGRAM]
@@ -28,10 +28,10 @@ def create_empty_user(user_id: int):
 @router.message(Command(commands=['tag']), f.InSettings(users.user_data))
 async def proccess_change_incl_tag(message: Message):
     await message.answer(text = 'Хочешь ли ты при добавлении нового слова писать его тэг? (напиши да/нет)',
-                        reply_markup = keyboard_yes_no)
+                        reply_markup = keyboard_yes_no_settings)
 
 
-@router.callback_query(Text(text=['yes_pressed']))
+@router.callback_query(Text(text=['yes_pressed_settings']))
 async def proccess_button_yes_press(callback: CallbackQuery):
     user_id = callback.from_user.id
     db = tables.sqlite3.connect('data/words.db')
@@ -44,7 +44,7 @@ async def proccess_button_yes_press(callback: CallbackQuery):
     db.close()
     users.user_data[user_id]['state'] = 'in_menu'
 
-@router.callback_query(Text(text=['no_pressed']))
+@router.callback_query(Text(text=['no_pressed_settings']))
 async def proccess_button_yes_press(callback: CallbackQuery):
     user_id = callback.from_user.id
     db = tables.sqlite3.connect('data/words.db')

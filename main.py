@@ -17,7 +17,9 @@ async def set_main_menu(bot: Bot):
         BotCommand(command='/add',
             description=LEXICON_RU['add_descr']),
         BotCommand(command='/settings',
-            description=LEXICON_RU['settings_descr'])]
+            description=LEXICON_RU['settings_descr']),
+        BotCommand(command='/delete',
+            description=LEXICON_RU['delete_descr'])]
 
     await bot.set_my_commands(main_menu_commands)
 
@@ -28,4 +30,5 @@ if __name__ == '__main__':
     dp.include_router(handlers.general_handlers.router)
     dp.include_router(handlers.settings_handlers.router)
     dp.include_router(handlers.add_handlers.router)
+    dp.include_router(handlers.delete_handlers.router)
     dp.run_polling(bot)

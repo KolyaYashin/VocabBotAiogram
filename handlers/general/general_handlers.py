@@ -47,13 +47,13 @@ async def proccess_stop(message: Message):
     user_id = message.from_user.id
     create_empty_user(user_id)
     await message.answer('Операция остановлена. Чтобы выйти в меню нажмите /menu')
-    users.user_data[user_id] = 'in_menu'
+    users.user_data[user_id]['state'] = 'in_menu'
 
 @router.message(Command(commands = ['menu']))
 async def proccess_menu(message: Message):
     user_id = message.from_user.id
     create_empty_user(user_id)
-    users.user_data[user_id] = 'in_menu'
+    users.user_data[user_id]['state'] = 'in_menu'
     db = tables.sqlite3.connect('data/words.db')
     sql = db.cursor()
     user_rating = int(sql.execute(f'SELECT rating FROM users WHERE user_id={user_id}').fetchone()[0])
