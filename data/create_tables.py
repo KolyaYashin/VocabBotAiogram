@@ -5,13 +5,11 @@ db = sqlite3.connect('data/words.db')
 sql = db.cursor()
 
 sql.execute("""CREATE TABLE IF NOT EXISTS words (
-                id INT,
                 user_id BIGINT,
                 en TEXT,
                 ru TEXT,
                 tag TEXT,
                 date DATE,
-                current_date DATE,
                 total SMALLINT,
                 successful SMALLINT,
                 winrate FLOAT,

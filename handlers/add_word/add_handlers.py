@@ -60,9 +60,9 @@ async def proccess_add_ru(message: Message):
         db = tables.sqlite3.connect('data/words.db')
         sql = db.cursor()
         rows_count = next(sql.execute("SELECT COUNT(*) FROM words"))[0]
-        sql.execute(f'INSERT INTO words VALUES ({rows_count+1}, {user_id}, "{users.user_data[user_id]["en"]}", '
+        sql.execute(f'INSERT INTO words VALUES ({user_id}, "{users.user_data[user_id]["en"]}", '
                 f'"{users.user_data[user_id]["ru"]}", "{users.user_data[user_id]["tag"]}", DATE("now", "localtime"), '
-                'DATE("now", "localtime"), 0, 0, 0, 1)')
+                '0, 0, 0, 1)')
         db.commit()
         sql.close()
         db.close()
@@ -80,9 +80,9 @@ async def proccess_add_tag(message: Message):
     db = tables.sqlite3.connect('data/words.db')
     sql = db.cursor()
     rows_count = next(sql.execute("SELECT COUNT(*) FROM words"))[0]
-    sql.execute(f'INSERT INTO words VALUES ({rows_count+1}, {user_id}, "{users.user_data[user_id]["en"]}", '
+    sql.execute(f'INSERT INTO words VALUES ( {user_id}, "{users.user_data[user_id]["en"]}", '
                 f'"{users.user_data[user_id]["ru"]}", "{users.user_data[user_id]["tag"]}", DATE("now", "localtime"), '
-                'DATE("now", "localtime"), 0, 0, 0, 1)')
+                '0, 0, 0, 1)')
     db.commit()
     sql.close()
     db.close()
