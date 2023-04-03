@@ -14,6 +14,12 @@ async def set_main_menu(bot: Bot):
         BotCommand(command='/settings',
             description=LEXICON_RU['settings_descr']),
         BotCommand(command='/delete',
-            description=LEXICON_RU['delete_descr'])]
+            description=LEXICON_RU['delete_descr']),
+
+        BotCommand(command='/tag',
+            description=LEXICON_RU['tag_descr']),
+
+        BotCommand(command='/count',
+            description=LEXICON_RU['count_descr']),]
 
     await bot.set_my_commands(main_menu_commands)

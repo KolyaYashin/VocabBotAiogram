@@ -39,10 +39,11 @@ async def proccess_button_yes_press(callback: CallbackQuery):
     users.user_data[user_id]['include_tag'] = 1
     sql.execute(f'UPDATE users SET include_tag = 1 WHERE user_id = {user_id}')
     db.commit()
-    await callback.message.answer(f'{users.user_data[user_id]["include_tag"]}, {users.user_data[user_id]["words_in_test"]}')
+    await callback.message.answer(LEXICON_RU['now_tag_included'])
     sql.close()
     db.close()
     users.user_data[user_id]['state'] = 'in_menu'
+    await callback.message.answer(LEXICON_RU['back_2menu'])
 
 @router.callback_query(Text(text=['no_pressed_settings']))
 async def proccess_button_yes_press(callback: CallbackQuery):
@@ -52,28 +53,29 @@ async def proccess_button_yes_press(callback: CallbackQuery):
     users.user_data[user_id]['include_tag'] = 0
     sql.execute(f'UPDATE users SET include_tag = 0 WHERE user_id = {user_id}')
     db.commit()
-    await callback.message.answer(f'{users.user_data[user_id]["include_tag"]}, {users.user_data[user_id]["words_in_test"]}')
+    await callback.message.answer(LEXICON_RU['now_tag_disabled'])
     sql.close()
     db.close()
     users.user_data[user_id]['state'] = 'in_menu'
+    await callback.message.answer(LEXICON_RU['back_2menu'])
 
 
 
 
 @router.message(Command(commands=['settings']))
 async def proccess_settings(message: Message):
-    await message.answer('Ты можешь изменить количество слов, которое будет в тестах. \n'
-                        'А также добавлять ли тэг в новые слова (если выключено, у новых слов будет стандартный тэг default).'
-                        '\nВернуться в меню - /menu')
+    await message.answer(LEXICON_RU['settings_start'] + LEXICON_RU['back_2menu'] + LEXICON_RU['change_tag'] + LEXICON_RU['change_count'])
     user_id = message.from_user.id
     create_empty_user(user_id)
     db = tables.sqlite3.connect('data/words.db')
     sql = db.cursor()
     query = next(sql.execute(f'SELECT set_test_words AS words, include_tag AS tag FROM users WHERE user_id = {user_id}'))
-    print(query)
     users.user_data[user_id]['include_tag'] = bool(query[1])
     users.user_data[user_id]['words_in_test'] = int(query[0])
-    await message.answer(f'{users.user_data[user_id]["include_tag"]}, {users.user_data[user_id]["words_in_test"]}')
+    if users.user_data[user_id]["include_tag"]:
+        await message.answer(LEXICON_RU['settings_current_pos'] + str(users.user_data[user_id]["words_in_test"]))
+    else:
+        await message.answer(LEXICON_RU['settings_current_neg'] + str(users.user_data[user_id]["words_in_test"]))
     users.user_data[user_id]['state'] = 'in_settings'
     sql.close()
     db.close()
