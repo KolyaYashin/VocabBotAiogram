@@ -7,22 +7,12 @@ from aiogram.types import Message, CallbackQuery
 from aiogram import Router, F
 from data.constant import MY_ID_TELEGRAM
 from keyboard.buttons import keyboard_yes_no_settings
-
+from data.create_empty import create_empty_user
 
 admin_ids = [MY_ID_TELEGRAM]
 router = Router()
 
-def create_empty_user(user_id: int):
-    if user_id not in users.user_data:
-        users.user_data[user_id]={
-            'en':'',
-            'ru':'',
-            'tag':'',
-            'score':0,
-            'state':'in_menu',
-            'words_in_test':5,
-            'include_tag': 1
-        }
+
 
 
 @router.message(Command(commands=['tag']), f.InSettings(users.user_data))

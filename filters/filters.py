@@ -83,3 +83,17 @@ class InDelete(BaseFilter):
                 return 1
             else:
                 return 0
+
+class InTest(BaseFilter):
+    users_dictionary: dict
+    def __init__(self, users_dict):
+        self.users_dictionary = users_dict
+    async def __call__(self, message: Message):
+        user_id = message.from_user.id
+        if user_id not in self.users_dictionary:
+            return 0
+        else:
+            if self.users_dictionary[user_id]['state'] == 'in_test':
+                return 1
+            else:
+                return 0

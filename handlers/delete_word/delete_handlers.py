@@ -2,6 +2,7 @@ import data.create_tables as tables
 import data.user_session as users
 from aiogram.filters import Command, Text
 import filters.filters as f
+from data.create_empty import create_empty_user
 from lexicon.lexicon_ru import LEXICON_RU
 from aiogram.types import Message, CallbackQuery
 from aiogram import Router, F
@@ -10,18 +11,6 @@ from keyboard.buttons import keyboard_yes_no_delete
 
 router = Router()
 
-
-def create_empty_user(user_id: int):
-    if user_id not in users.user_data:
-        users.user_data[user_id]={
-            'en':'',
-            'ru':'',
-            'tag':'',
-            'score':0,
-            'state':'in_menu',
-            'words_in_test':5,
-            'include_tag': 1
-        }
 
 
 @router.message(Command(commands=['delete']))
@@ -60,6 +49,7 @@ async def proccess_delete_word(callback: CallbackQuery):
     db.close()
     await callback.message.answer(str(LEXICON_RU['word'] + en + LEXICON_RU['deleted']))
     users.user_data[user_id]['state'] = 'in_menu'
+    await callback.answer()
 
 
 @router.callback_query(Text(text=['no_pressed_delete']))
@@ -67,3 +57,4 @@ async def proccess_exit(callback: CallbackQuery):
     user_id = callback.from_user.id
     await callback.message.answer(LEXICON_RU['stoped'])
     users.user_data[user_id]['state']= 'in_menu'
+    await callback.answer()
