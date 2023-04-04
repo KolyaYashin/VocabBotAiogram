@@ -22,4 +22,5 @@ LEXICON_RU: dict[str, str] = {'yes': 'ДА!',
                               'now_tag_included':'Теперь тэги включены!',
                               'now_tag_disabled':'Теперь тэги выключены!',
                               'change_tag':'\nИзменить тэг - /tag',
-                              'change_count':'\nИзменить количество слов - /count'}
+                              'change_count':'\nИзменить количество слов - /count',
+                              'new_count':'Вы задали новое число слов в тесте - '}

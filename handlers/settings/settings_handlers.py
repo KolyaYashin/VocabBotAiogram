@@ -27,8 +27,27 @@ def create_empty_user(user_id: int):
 
 @router.message(Command(commands=['tag']), f.InSettings(users.user_data))
 async def proccess_change_incl_tag(message: Message):
-    await message.answer(text = 'Хочешь ли ты при добавлении нового слова писать его тэг? (напиши да/нет)',
+    await message.answer(text = 'Хочешь ли ты при добавлении нового слова писать его тэг?',
                         reply_markup = keyboard_yes_no_settings)
+
+
+
+@router.message(Command(commands=['count']), f.InSettings(users.user_data))
+async def proccess_change_incl_tag(message: Message):
+    await message.answer(text = 'Тесты на сколько слов хочешь проходить?')
+
+@router.message(lambda message: message.text.isnumeric(), f.InSettings(users.user_data))
+async def isnumeric(message: Message):
+    new_count = int(message.text)
+    user_id = message.from_user.id
+    db = tables.sqlite3.connect('data/words.db')
+    sql = db.cursor()
+    sql.execute(f'UPDATE users SET set_test_words = {new_count} WHERE user_id = {user_id}')
+    db.commit()
+    sql.close()
+    db.close()
+    await message.answer(LEXICON_RU['new_count'] + str(new_count)+'\n'+ LEXICON_RU['back_2menu'])
+
 
 
 @router.callback_query(Text(text=['yes_pressed_settings']))

@@ -1,5 +1,3 @@
-from data.constant import MY_ID_TELEGRAM
-from lexicon.lexicon_ru import LEXICON_RU
 from create_bot import dp, bot
 import handlers
 from main_menu import set_main_menu
