@@ -50,7 +50,7 @@ async def isnumeric(message: Message):
 
 
 
-@router.callback_query(Text(text=['yes_pressed_settings']))
+@router.callback_query(Text(text=['yes_pressed_settings']), f.InSettings(users.user_data))
 async def proccess_button_yes_press(callback: CallbackQuery):
     user_id = callback.from_user.id
     db = tables.sqlite3.connect('data/words.db')
@@ -63,8 +63,9 @@ async def proccess_button_yes_press(callback: CallbackQuery):
     db.close()
     users.user_data[user_id]['state'] = 'in_menu'
     await callback.message.answer(LEXICON_RU['back_2menu'])
+    await callback.answer()
 
-@router.callback_query(Text(text=['no_pressed_settings']))
+@router.callback_query(Text(text=['no_pressed_settings']), f.InSettings(users.user_data))
 async def proccess_button_yes_press(callback: CallbackQuery):
     user_id = callback.from_user.id
     db = tables.sqlite3.connect('data/words.db')
@@ -77,6 +78,8 @@ async def proccess_button_yes_press(callback: CallbackQuery):
     db.close()
     users.user_data[user_id]['state'] = 'in_menu'
     await callback.message.answer(LEXICON_RU['back_2menu'])
+    await callback.answer()
+
 
 
 
