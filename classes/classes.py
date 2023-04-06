@@ -1,5 +1,5 @@
 import sqlite3
-
+from data.update_table import update
 
 
 class Word:
@@ -20,7 +20,7 @@ class Word:
 class Dictionary:
 
     words: list[Word]
-
+    words_copy: list[Word]
     def __init__(self,count:int, name:str):
         db=sqlite3.connect(name)
         sql = db.cursor()
@@ -29,6 +29,7 @@ class Dictionary:
         for i in range(count):
             word=select.fetchone()
             self.words.append(Word(word[0],word[1],word[2],word[3],word[4]))
+        self.words_copy = self.words.copy()
         sql.close()
         db.close()
 
@@ -51,3 +52,15 @@ class Dictionary:
                 del self.words[i]
                 return
         return
+
+    def update(self, name):
+        db = sqlite3.connect(name)
+        sql = db.cursor()
+        for i in range(len(self.words_copy)):
+            word_i= self.words_copy[i]
+            print(f'UPDATE words SET total = {word_i.total}, successful = {word_i.success}, date = DATE("now", "localtime") WHERE en = "{word_i.en}"')
+            sql.execute(f'UPDATE words SET total = {word_i.total}, successful = {word_i.success}, date = DATE("now", "localtime") WHERE en = "{word_i.en}"')
+        db.commit()
+        sql.close()
+        db.close()
+        update('data/words.db')

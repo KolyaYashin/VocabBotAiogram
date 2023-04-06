@@ -1,6 +1,6 @@
 import data.create_tables as tables
 import data.user_session as users
-from aiogram.filters import Command
+from aiogram.filters import Command, Text
 import filters.filters as f
 from lexicon.lexicon_ru import LEXICON_RU
 from aiogram.types import Message
@@ -28,7 +28,7 @@ async def proccess_add(message: Message):
     sql.close()
     db.close()
 
-@router.message(F.text, f.InAddEn(users.user_data))
+@router.message(F.text,~Text(startswith='/'), f.InAddEn(users.user_data))
 async def proccess_add_en(message: Message):
     user_id = message.from_user.id
     en = message.text
@@ -36,7 +36,7 @@ async def proccess_add_en(message: Message):
     users.user_data[user_id]['state'] = 'in_add_ru'
     await message.answer('Введите перевод слова')
 
-@router.message(F.text, f.InAddRu(users.user_data))
+@router.message(F.text,~Text(startswith='/'), f.InAddRu(users.user_data))
 async def proccess_add_ru(message: Message):
     user_id = message.from_user.id
     ru = message.text
@@ -61,7 +61,7 @@ async def proccess_add_ru(message: Message):
         users.user_data[user_id]['state'] = 'in_add_en'
 
 
-@router.message(F.text, f.InAddTag(users.user_data))
+@router.message(F.text,~Text(startswith='/'), f.InAddTag(users.user_data))
 async def proccess_add_tag(message: Message):
     user_id = message.from_user.id
     tag = message.text
