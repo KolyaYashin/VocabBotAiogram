@@ -32,7 +32,7 @@ async def proccess_put_word_2delete(message: Message):
     else:
         await message.answer(LEXICON_RU['you_sure'],
                         reply_markup = keyboard_yes_no_delete)
-        users.user_data['en'] = message.text
+        users.user_data[user_id]['en'] = message.text
     sql.close()
     db.close()
 
@@ -42,7 +42,7 @@ async def proccess_delete_word(callback: CallbackQuery):
     user_id = callback.from_user.id
     db = tables.sqlite3.connect('data/words.db')
     sql = db.cursor()
-    en = users.user_data['en']
+    en = users.user_data[user_id]['en']
     sql.execute(f'DELETE FROM words WHERE en = "{en}" AND user_id = {user_id}')
     db.commit()
     sql.close()

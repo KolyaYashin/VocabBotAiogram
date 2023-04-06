@@ -25,7 +25,7 @@ class Dictionary:
         db=sqlite3.connect(name)
         sql = db.cursor()
         self.words = []
-        select=sql.execute('SELECT en,ru,total,successful,coef FROM words ORDER BY coef DESC')
+        select=sql.execute('SELECT en,ru,total,successful,coef FROM words ORDER BY coef ASC')
         for i in range(count):
             word=select.fetchone()
             self.words.append(Word(word[0],word[1],word[2],word[3],word[4]))
@@ -38,3 +38,16 @@ class Dictionary:
             ans+=str(self.words[i])
             ans+='         ,           '
         return ans
+
+    def __call__(self):
+        i=-1
+        while len(self.words)>0:
+            i= (i+1)%len(self.words)
+            yield self.words[i]
+
+    def delete_word(self, ru:str):
+        for i in range(len(self.words)):
+            if self.words[i].ru == ru:
+                del self.words[i]
+                return
+        return

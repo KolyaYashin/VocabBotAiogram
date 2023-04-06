@@ -1,4 +1,5 @@
 venv
+to-do.txt
 constant.py
 __pycache__/
 words.db
