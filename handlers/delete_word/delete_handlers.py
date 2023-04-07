@@ -12,7 +12,6 @@ from keyboard.buttons import keyboard_yes_no_delete
 router = Router()
 
 
-
 @router.message(Command(commands=['delete']))
 async def proccess_start_delete(message: Message):
     user_id = message.from_user.id

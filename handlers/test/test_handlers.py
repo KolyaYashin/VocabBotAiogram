@@ -24,7 +24,7 @@ async def start_test(message:Message):
     user_id = message.from_user.id
     count = next(sql.execute(f'SELECT set_test_words FROM users WHERE user_id={user_id}'))[0]
     create_empty_user(user_id)
-    user_data[user_id]['test_dictionary'] = Dictionary(count, 'data/words.db')
+    user_data[user_id]['test_dictionary'] = Dictionary(count, 'data/words.db', user_id)
     user_data[user_id]['test_gen'] = user_data[user_id]['test_dictionary']()
     user_data[user_id]['current_word'] = next(user_data[user_id]['test_gen'])
     user_data[user_id]['state'] = 'in_test'
@@ -63,7 +63,7 @@ async def check_word(message: Message):
             await message.answer(LEXICON_RU['test_ended']+
             str("%.2f"%make_wr(user_data[user_id]['total'],user_data[user_id]['correct'])))
             await message.answer(LEXICON_RU['back_2menu'])
-            user_data[user_id]['test_dictionary'].update('data/words.db')
+            user_data[user_id]['test_dictionary'].update('data/words.db', user_id)
     else:
         await message.answer(LEXICON_RU['wrong_answer']+real_translate)
         user_data[user_id]['current_word'] = next(user_data[user_id]['test_gen'])
