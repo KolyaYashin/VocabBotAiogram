@@ -21,14 +21,18 @@ class Dictionary:
 
     words: list[Word]
     words_copy: list[Word]
-    def __init__(self,count:int, name:str, id:int):
+    tag: str
+    def __init__(self,count:int, name:str, id:int, tag:str):
         db=sqlite3.connect(name)
         sql = db.cursor()
         self.words = []
-        select=sql.execute(f'SELECT en,ru,total,successful,coef FROM words WHERE user_id = {id} ORDER BY coef ASC')
+        self.tag = tag
+        select=sql.execute(f'SELECT en,ru,total,successful,coef FROM words WHERE user_id = {id} AND tag LIKE "{tag}" ORDER BY coef ASC')
+
         for i in range(count):
             word=select.fetchone()
-            self.words.append(Word(word[0],word[1],word[2],word[3],word[4]))
+            if word is not None:
+                self.words.append(Word(word[0],word[1],word[2],word[3],word[4]))
         self.words_copy = self.words.copy()
         sql.close()
         db.close()
