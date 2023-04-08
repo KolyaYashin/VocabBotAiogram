@@ -6,7 +6,6 @@ from data.create_empty import create_empty_user
 from lexicon.lexicon_ru import LEXICON_RU
 from aiogram.types import Message, CallbackQuery
 from aiogram import Router, F
-from data.constant import MY_ID_TELEGRAM
 from keyboard.buttons import keyboard_yes_no_delete
 
 router = Router()

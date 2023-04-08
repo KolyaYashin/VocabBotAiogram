@@ -1,6 +1,5 @@
 import data.create_tables as tables
 from data.user_session import user_data
-
 from data.create_empty import create_empty_user
 from aiogram.filters import Command, Text
 import filters.filters as f
@@ -73,6 +72,6 @@ async def check_word(message: Message):
             await message.answer(LEXICON_RU['back_2menu'])
             user_data[user_id]['test_dictionary'].update('data/words.db', user_id)
     else:
-        await message.answer(LEXICON_RU['wrong_answer']+real_translate)
+        await message.answer(LEXICON_RU['wrong_answer']+real_translate+LEXICON_RU['rating_minus'])
         user_data[user_id]['current_word'] = next(user_data[user_id]['test_gen'])
         await message.answer(LEXICON_RU['next_word']+(user_data[user_id]['current_word'].en))
