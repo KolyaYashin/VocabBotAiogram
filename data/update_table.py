@@ -1,9 +1,11 @@
 import sqlite3
+import math
 
 C = 0.1
 
 def update(db_name):
     db = sqlite3.connect(db_name)
+    db.create_function('sqrt', 1, math.sqrt)
     sql = db.cursor()
     with db:
         sql.execute(f'UPDATE words SET winrate = CASE WHEN total=0 THEN 0 ELSE'
