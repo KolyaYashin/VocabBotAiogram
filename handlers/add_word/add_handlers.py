@@ -31,7 +31,7 @@ async def proccess_add(message: Message):
 @router.message(F.text,~Text(startswith='/'), f.InAddEn(users.user_data))
 async def proccess_add_en(message: Message):
     user_id = message.from_user.id
-    en = message.text
+    en = message.text.lower()
     users.user_data[user_id]['en'] = en
     users.user_data[user_id]['state'] = 'in_add_ru'
     await message.answer('Введите перевод слова')
@@ -39,7 +39,7 @@ async def proccess_add_en(message: Message):
 @router.message(F.text,~Text(startswith='/'), f.InAddRu(users.user_data))
 async def proccess_add_ru(message: Message):
     user_id = message.from_user.id
-    ru = message.text
+    ru = message.text.lower()
     users.user_data[user_id]['ru'] = ru
     if users.user_data[user_id]['include_tag']:
         users.user_data[user_id]['state'] = 'in_add_tag'
@@ -64,7 +64,7 @@ async def proccess_add_ru(message: Message):
 @router.message(F.text,~Text(startswith='/'), f.InAddTag(users.user_data))
 async def proccess_add_tag(message: Message):
     user_id = message.from_user.id
-    tag = message.text
+    tag = message.text.lower()
     users.user_data[user_id]['tag'] = tag
     db = tables.sqlite3.connect('data/words.db')
     sql = db.cursor()
