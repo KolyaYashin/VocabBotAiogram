@@ -38,6 +38,7 @@ async def start_test(message:Message):
         user_data[user_id]['state'] = 'in_test'
         user_data[user_id]['total'] = 0
         user_data[user_id]['correct'] = 0
+        user_data[user_id]['rating_diff'] = 0
         sql.close()
         db.close()
         await message.answer(LEXICON_RU['test_start'] + str(len(user_data[user_id]['test_dictionary'].words)))
@@ -50,7 +51,7 @@ async def stop_in_test(message: Message):
     await message.answer(LEXICON_RU['test_ended']+
     str(make_wr(user_data[user_id]['total'],user_data[user_id]['correct'])))
     await message.answer(LEXICON_RU['back_2menu'])
-    user_data[user_id]['test_dictionary'].update('data/words.db', user_id)
+    user_data[user_id]['test_dictionary'].update('data/words.db', user_id, user_data[user_id]['rating_diff'])
 
 
 @router.message(F.text,~Text(startswith='/'), f.InTest(user_data))
@@ -61,6 +62,7 @@ async def check_word(message: Message):
     user_data[user_id]['total']+=1
     user_data[user_id]['current_word'].total += 1
     if user_translate == real_translate:
+        user_data[user_id]['rating_diff']+= 5
         user_data[user_id]['correct']+=1
         user_data[user_id]['current_word'].success += 1
         await message.answer(LEXICON_RU['correct_answer'])
@@ -72,8 +74,9 @@ async def check_word(message: Message):
             await message.answer(LEXICON_RU['test_ended']+
             str("%.2f"%make_wr(user_data[user_id]['total'],user_data[user_id]['correct'])))
             await message.answer(LEXICON_RU['back_2menu'])
-            user_data[user_id]['test_dictionary'].update('data/words.db', user_id)
+            user_data[user_id]['test_dictionary'].update('data/words.db', user_id, user_data[user_id]['rating_diff'])
     else:
+        user_data[user_id]['rating_diff']-=5
         await message.answer(LEXICON_RU['wrong_answer']+real_translate+LEXICON_RU['rating_minus'])
         user_data[user_id]['current_word'] = next(user_data[user_id]['test_gen'])
         await message.answer(LEXICON_RU['next_word']+(user_data[user_id]['current_word'].en))

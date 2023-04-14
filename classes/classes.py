@@ -57,7 +57,7 @@ class Dictionary:
                 return
         return
 
-    def update(self, name, id):
+    def update(self, name, id, rat_dif):
         db = sqlite3.connect(name)
         sql = db.cursor()
         for i in range(len(self.words_copy)):
@@ -66,6 +66,7 @@ class Dictionary:
             f'date = DATE("now", "localtime") WHERE en = "{word_i.en}" AND user_id={id}')
             sql.execute(f'UPDATE words SET total = {word_i.total}, successful = {word_i.success}, '
             f'date = DATE("now", "localtime") WHERE en = "{word_i.en}" AND user_id={id}')
+            sql.execute(f'UPDATE users SET rating=rating+{rat_dif}')
         db.commit()
         sql.close()
         db.close()
