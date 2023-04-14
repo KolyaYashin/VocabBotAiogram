@@ -7,6 +7,7 @@ from lexicon.lexicon_ru import LEXICON_RU
 from aiogram.types import Message
 from aiogram import Router, F
 from classes.classes import Dictionary
+from data.update_table import update
 
 router = Router()
 
@@ -18,6 +19,7 @@ def make_wr(tot, cor):
 
 @router.message(Command(commands=['test']))
 async def start_test(message:Message):
+    update('data/words.db')
     db = tables.sqlite3.connect('data/words.db')
     sql = db.cursor()
     try:

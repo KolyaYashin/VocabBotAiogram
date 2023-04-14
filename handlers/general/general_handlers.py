@@ -30,7 +30,7 @@ async def proccess_start(message: Message):
 
 @router.message(Command(commands=['help']))
 async def proccess_help(message: Message):
-    await message.answer('Список команд ...')
+    await message.answer(LEXICON_RU['help'])
 
 @router.message(Command(commands = ['stop']))
 async def proccess_stop(message: Message):
