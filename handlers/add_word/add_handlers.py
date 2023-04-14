@@ -71,7 +71,7 @@ async def proccess_add_tag(message: Message):
     rows_count = next(sql.execute("SELECT COUNT(*) FROM words"))[0]
     sql.execute(f'INSERT INTO words VALUES ( {user_id}, "{users.user_data[user_id]["en"]}", '
                 f'"{users.user_data[user_id]["ru"]}", "{users.user_data[user_id]["tag"]}", DATE("now", "localtime"), '
-                '0, 0, 0, 1)')
+                '0, 0, 0, 0)')
     db.commit()
     sql.close()
     db.close()

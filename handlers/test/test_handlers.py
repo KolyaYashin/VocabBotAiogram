@@ -54,7 +54,7 @@ async def stop_in_test(message: Message):
 @router.message(F.text,~Text(startswith='/'), f.InTest(user_data))
 async def check_word(message: Message):
     user_id = message.from_user.id
-    user_translate = message.text
+    user_translate = message.text.lower()
     real_translate = user_data[user_id]['current_word'].ru
     user_data[user_id]['total']+=1
     user_data[user_id]['current_word'].total += 1

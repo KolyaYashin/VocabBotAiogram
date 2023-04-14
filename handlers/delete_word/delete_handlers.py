@@ -19,18 +19,18 @@ async def proccess_start_delete(message: Message):
     await message.answer(LEXICON_RU['enter_en_word'])
 
 
-@router.message(F.text, f.InDelete(users.user_data))
+@router.message(F.text,~Text(startswith='/'), f.InDelete(users.user_data))
 async def proccess_put_word_2delete(message: Message):
     db = tables.sqlite3.connect('data/words.db')
     sql = db.cursor()
     user_id = message.from_user.id
-    select = sql.execute(f'SELECT * FROM words WHERE en="{message.text}" AND user_id={user_id}')
+    select = sql.execute(f'SELECT * FROM words WHERE en="{message.text.lower()}" AND user_id={user_id}')
     if select.fetchone() is None:
         await message.answer(LEXICON_RU['havent_found'])
     else:
         await message.answer(LEXICON_RU['you_sure'],
                         reply_markup = keyboard_yes_no_delete)
-        users.user_data[user_id]['en'] = message.text
+        users.user_data[user_id]['en'] = message.text.lower()
     sql.close()
     db.close()
 
