@@ -7,6 +7,7 @@ from aiogram.types import Message
 from aiogram import Router, F
 from data.constant import MY_ID_TELEGRAM
 from data.create_empty import create_empty_user
+from keyboard.buttons import menu_keyboard
 
 
 admin_ids = [MY_ID_TELEGRAM]
@@ -22,7 +23,7 @@ async def proccess_start(message: Message):
     user_id = message.from_user.id
     count = sql.execute(f'SELECT COUNT(*) FROM users WHERE user_id={user_id}')
     if next(count)[0]==0:
-        sql.execute(f'INSERT INTO users VALUES ({user_id}, 0, 0, 0, 1000, 5, 1)')
+        sql.execute(f'INSERT INTO users VALUES ({user_id}, 0, 0, 0, 1000, 5, 0)')
         db.commit()
     await message.answer(LEXICON_RU['welcome'])
     sql.close()
@@ -47,7 +48,7 @@ async def proccess_menu(message: Message):
     db = tables.sqlite3.connect('data/words.db')
     sql = db.cursor()
     user_rating = int(sql.execute(f'SELECT rating FROM users WHERE user_id={user_id}').fetchone()[0])
-    await message.answer(f'Рейтинг - {user_rating}')
+    await message.answer(f'Рейтинг - {user_rating}',reply_markup=menu_keyboard)
     sql.close()
     db.close()
 

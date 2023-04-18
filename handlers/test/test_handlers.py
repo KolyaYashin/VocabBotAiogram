@@ -17,6 +17,8 @@ def make_wr(tot, cor):
     else:
         return cor/tot
 
+
+
 @router.message(Command(commands=['test']))
 async def start_test(message:Message):
     update('data/words.db')

@@ -15,7 +15,7 @@ class Word:
         self.success = success
         self.coef = coef
     def __str__(self):
-        return 'Word is '+self.en+', on Russian: '+self.ru  + ' total ' + str(self.total) + ' successful ' + str(self.success)+' coef ' + str(self.coef)
+        return 'Ваше слово - '+self.en+', перевод: '+self.ru  + ' total ' + str(self.total) + ' successful ' + str(self.success)+' coef ' + str(self.coef)
 
 class Dictionary:
 
