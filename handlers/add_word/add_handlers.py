@@ -3,7 +3,7 @@ import data.user_session as users
 from aiogram.filters import Command, Text
 import filters.filters as f
 from lexicon.lexicon_ru import LEXICON_RU
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 from aiogram import Router, F
 from data.constant import MY_ID_TELEGRAM
 from data.create_empty import create_empty_user
@@ -12,21 +12,26 @@ from data.create_empty import create_empty_user
 admin_ids = [MY_ID_TELEGRAM]
 router = Router()
 
-
-
-@router.message(Command(commands=['add']))
-async def proccess_add(message: Message):
+async def proccess_add(message: Message, user_id: int):
     db = tables.sqlite3.connect('data/words.db')
     sql = db.cursor()
-    user_id = message.from_user.id
     create_empty_user(user_id)
     incl_tag = next(sql.execute(f"SELECT include_tag FROM users WHERE user_id={user_id}"))[0]
-    print()
     users.user_data[user_id]['include_tag'] = int(incl_tag)
     users.user_data[user_id]['state']='in_add_en'
     await message.answer('Введите слово на английском')
     sql.close()
     db.close()
+
+@router.message(Command(commands=['add']))
+async def proccess_add_command(message: Message):
+    await proccess_add(message, message.from_user.id)
+
+@router.callback_query(Text(text=['to_add']))
+async def proccess_add_button(callback: CallbackQuery):
+    await callback.answer()
+    await proccess_add(callback.message, callback.from_user.id)
+
 
 @router.message(F.text,~Text(startswith='/'), f.InAddEn(users.user_data))
 async def proccess_add_en(message: Message):
@@ -48,7 +53,6 @@ async def proccess_add_ru(message: Message):
         users.user_data[user_id]['tag'] = 'none'
         db = tables.sqlite3.connect('data/words.db')
         sql = db.cursor()
-        rows_count = next(sql.execute("SELECT COUNT(*) FROM words"))[0]
         sql.execute(f'INSERT INTO words VALUES ({user_id}, "{users.user_data[user_id]["en"]}", '
                 f'"{users.user_data[user_id]["ru"]}", "{users.user_data[user_id]["tag"]}", DATE("now", "localtime"), '
                 '0, 0, 0, 1)')
@@ -68,7 +72,6 @@ async def proccess_add_tag(message: Message):
     users.user_data[user_id]['tag'] = tag
     db = tables.sqlite3.connect('data/words.db')
     sql = db.cursor()
-    rows_count = next(sql.execute("SELECT COUNT(*) FROM words"))[0]
     sql.execute(f'INSERT INTO words VALUES ( {user_id}, "{users.user_data[user_id]["en"]}", '
                 f'"{users.user_data[user_id]["ru"]}", "{users.user_data[user_id]["tag"]}", DATE("now", "localtime"), '
                 '0, 0, 0, 0)')

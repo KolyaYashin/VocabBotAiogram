@@ -10,13 +10,20 @@ from keyboard.buttons import keyboard_yes_no_delete
 
 router = Router()
 
-
-@router.message(Command(commands=['delete']))
-async def proccess_start_delete(message: Message):
-    user_id = message.from_user.id
+async def start_delete(message: Message, user_id: int):
     create_empty_user(user_id)
     users.user_data[user_id]['state'] = 'in_delete'
     await message.answer(LEXICON_RU['enter_en_word'])
+
+
+@router.message(Command(commands=['delete']))
+async def proccess_start_delete(message: Message):
+    await start_delete(message, message.from_user.id)
+
+@router.callback_query(Text(text=['to_delete']))
+async def start_delete_button(callback: CallbackQuery):
+    await callback.answer()
+    await start_delete(callback.message, callback.from_user.id)
 
 
 @router.message(F.text,~Text(startswith='/'), f.InDelete(users.user_data))
@@ -45,7 +52,7 @@ async def proccess_delete_word(callback: CallbackQuery):
     db.commit()
     sql.close()
     db.close()
-    await callback.message.answer(str(LEXICON_RU['word'] + en + LEXICON_RU['deleted']))
+    await callback.message.answer(str(LEXICON_RU['word'] + en + LEXICON_RU['deleted']+LEXICON_RU['back_2menu']))
     users.user_data[user_id]['state'] = 'in_menu'
     await callback.answer()
 

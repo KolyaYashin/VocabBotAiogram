@@ -4,7 +4,7 @@ from data.create_empty import create_empty_user
 from aiogram.filters import Command, Text
 import filters.filters as f
 from lexicon.lexicon_ru import LEXICON_RU
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery
 from aiogram import Router, F
 from classes.classes import Dictionary
 from data.update_table import update
@@ -17,10 +17,7 @@ def make_wr(tot, cor):
     else:
         return cor/tot
 
-
-
-@router.message(Command(commands=['test']))
-async def start_test(message:Message):
+async def test_start(message: Message, user_id: int, from_callback: bool):
     update('data/words.db')
     db = tables.sqlite3.connect('data/words.db')
     sql = db.cursor()
@@ -28,13 +25,15 @@ async def start_test(message:Message):
         test_tag = message.text.split(' ', 1)[1]
     except IndexError:
         test_tag = '%'
-    user_id = message.from_user.id
+    if from_callback:
+        test_tag = '%'
     count = next(sql.execute(f'SELECT set_test_words FROM users WHERE user_id={user_id}'))[0]
     create_empty_user(user_id)
     user_data[user_id]['test_dictionary'] = Dictionary(count, 'data/words.db', user_id, test_tag)
+    print(test_tag)
     user_data[user_id]['test_gen'] = user_data[user_id]['test_dictionary']()
     if len(user_data[user_id]['test_dictionary'].words) == 0:
-        await message.answer(LEXICON_RU['no_words'])
+        await message.answer(LEXICON_RU['no_words']+LEXICON_RU['back_2menu'])
     else:
         user_data[user_id]['current_word'] = next(user_data[user_id]['test_gen'])
         user_data[user_id]['state'] = 'in_test'
@@ -45,6 +44,15 @@ async def start_test(message:Message):
         db.close()
         await message.answer(LEXICON_RU['test_start'] + str(len(user_data[user_id]['test_dictionary'].words)))
         await message.answer(LEXICON_RU['word_in_en']+(user_data[user_id]['current_word'].en))
+
+@router.message(Command(commands=['test']))
+async def start_test(message:Message):
+    await test_start(message, message.from_user.id, 0)
+
+@router.callback_query(Text(text=['to_test']))
+async def start_test_button(callback: CallbackQuery):
+    await callback.answer()
+    await test_start(callback.message, callback.from_user.id, 1)
 
 
 @router.message(f.InTest(user_data), Command(commands=['stop']))

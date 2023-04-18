@@ -71,13 +71,8 @@ async def proccess_button_yes_press(callback: CallbackQuery):
     await callback.answer()
 
 
-
-
-
-@router.message(Command(commands=['settings']))
-async def proccess_settings(message: Message):
+async def start_settings(message: Message, user_id: int):
     await message.answer(LEXICON_RU['settings_start'] + LEXICON_RU['back_2menu'] + LEXICON_RU['change_tag'] + LEXICON_RU['change_count'])
-    user_id = message.from_user.id
     create_empty_user(user_id)
     db = tables.sqlite3.connect('data/words.db')
     sql = db.cursor()
@@ -91,3 +86,13 @@ async def proccess_settings(message: Message):
     users.user_data[user_id]['state'] = 'in_settings'
     sql.close()
     db.close()
+
+
+@router.message(Command(commands=['settings']))
+async def proccess_settings(message: Message):
+    await start_settings(message, message.from_user.id)
+
+@router.callback_query(Text(text=['to_settings']))
+async def proccess_settings_button(callback: CallbackQuery):
+    await callback.answer()
+    await start_settings(callback.message, callback.from_user.id)
