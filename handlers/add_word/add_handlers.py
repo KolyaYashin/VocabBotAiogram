@@ -78,7 +78,7 @@ async def proccess_add_tag(message: Message):
     db.commit()
     sql.close()
     db.close()
-    await message.answer(f'Слово {users.user_data[user_id]["en"]}, {users.user_data[user_id]["ru"]}, '
-                        f'{users.user_data[user_id]["tag"]} успешно добавлено!')
+    await message.answer(f'Слово <b>{users.user_data[user_id]["en"]}</b>, с переводом <b>{users.user_data[user_id]["ru"]}</b>, '
+                        f' успешно добавлено!')
     await message.answer('Вы можете либо добавить следующее слово, либо нажать на /menu')
     users.user_data[user_id]['state'] = 'in_add_en'
