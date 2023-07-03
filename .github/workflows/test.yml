@@ -8,4 +8,6 @@ jobs:
     my_buld_job:
         runs-on: ubuntu-latest
         steps:
-            - run: echo Hello
+            - run: ssh kolka@45.140.179.214
+            - run: ls
+            - run: exit
