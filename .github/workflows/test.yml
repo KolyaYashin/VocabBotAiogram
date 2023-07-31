@@ -6,8 +6,10 @@ on:
 
 jobs:
     my_buld_job:
-        runs-on: ubuntu-latest
-        steps:
-            - run: ssh kolka@45.140.179.214
-            - run: ls
-            - run: exit
+        - name: multiple command
+        uses: appleboy/ssh-action@master
+        with:
+            host: ${{ secrets.SSH_HOST }}
+            username: ${{ secrets.USERNAME }}
+            key: ${{ secrets.SSH_PRIVATE_KEY }}
+            script: |
