@@ -1,5 +1,5 @@
 import sqlite3
-from data.constant import MY_ID_TELEGRAM
+
 
 db = sqlite3.connect('data/words.db')
 sql = db.cursor()

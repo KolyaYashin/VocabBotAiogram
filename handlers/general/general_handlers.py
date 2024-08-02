@@ -1,3 +1,5 @@
+import os
+
 import data.create_tables as tables
 import data.user_session as users
 from aiogram.filters import Command
@@ -5,11 +7,11 @@ import filters.filters as f
 from lexicon.lexicon_ru import LEXICON_RU
 from aiogram.types import Message
 from aiogram import Router, F
-from data.constant import MY_ID_TELEGRAM
 from data.create_empty import create_empty_user
 from keyboard.buttons import menu_keyboard
 
-
+global MY_ID_TELEGRAM
+MY_ID_TELEGRAM = os.environ['MY_TG_ID']
 admin_ids = [MY_ID_TELEGRAM]
 router = Router()
 

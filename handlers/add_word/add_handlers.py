@@ -5,10 +5,13 @@ import filters.filters as f
 from lexicon.lexicon_ru import LEXICON_RU
 from aiogram.types import Message, CallbackQuery
 from aiogram import Router, F
-from data.constant import MY_ID_TELEGRAM
+#from data.constant import MY_ID_TELEGRAM
 from data.create_empty import create_empty_user
+import os
 
 
+global MY_ID_TELEGRAM
+MY_ID_TELEGRAM = os.environ['MY_TG_ID']
 admin_ids = [MY_ID_TELEGRAM]
 router = Router()
 

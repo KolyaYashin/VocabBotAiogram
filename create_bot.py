@@ -1,6 +1,6 @@
-from data.constant import BOT_TOKEN
+import os
 from aiogram import Bot
 from aiogram import Dispatcher
 
-bot: Bot = Bot(token = BOT_TOKEN, parse_mode='HTML')
+bot: Bot = Bot(token=os.environ['TOKEN_VOCAB'], parse_mode='HTML')
 dp: Dispatcher = Dispatcher()
