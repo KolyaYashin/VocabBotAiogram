@@ -11,5 +11,11 @@ WORKDIR /home/VocabBotAiogram
 
 RUN pip install -r requirements.txt
 
+COPY run.sh run.sh
 
-ENTRYPOINT ["python3", "main.py"]
+RUN chmod +x /home/VocabBotAiogram/run.sh
+
+
+ENTRYPOINT ["/home/VocabBotAiogram/run.sh"]
+
+#ENTRYPOINT ["python3", "main.py"]

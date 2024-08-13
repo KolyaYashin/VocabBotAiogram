@@ -7,3 +7,4 @@ query.sql
 just_test.ipynb
 .ipynb_checkpoints/
 .idea/
+run.sh
