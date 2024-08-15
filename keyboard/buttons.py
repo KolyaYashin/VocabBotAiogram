@@ -14,8 +14,8 @@ keyboard_yes_no_delete = InlineKeyboardMarkup(inline_keyboard=[[button_yes_delet
 
 menu_buttons = []
 
-callbacks = [['to_add','to_test'],['to_delete','to_settings']]
-texts = [['Добавить слово','Тест'],['Удалить слово','Настройки']]
+callbacks = [['to_add', 'to_test'], ['to_delete', 'to_settings']]
+texts = [['Добавить слово', 'Тест'], ['Удалить слово', 'Настройки']]
 
 for i in range(len(callbacks)):
     menu_buttons.append([InlineKeyboardButton(text=texts[i][0],callback_data=callbacks[i][0]),

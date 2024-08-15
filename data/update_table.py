@@ -1,10 +1,16 @@
-import sqlite3
+import psycopg2
+import os
 import math
 
 C = 0.1
 
+
 def update(db_name):
-    db = sqlite3.connect(db_name)
+    db = psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
+                          user=os.environ['POSTGRES_USER'],
+                          password=os.environ['POSTGRES_PASSWORD'],
+                          host="postgres_db",  # Это имя контейнера с базой данных
+                          port="5432")
     db.create_function('sqrt', 1, math.sqrt)
     db.create_function('tanh', 1, math.tanh)
     sql = db.cursor()

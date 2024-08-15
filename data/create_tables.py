@@ -1,7 +1,13 @@
-import sqlite3
+import psycopg2
+import os
 
-
-db = sqlite3.connect('data/words.db')
+db = psycopg2.connect(
+    dbname=os.environ['POSTGRES_DB'],
+    user=os.environ['POSTGRES_USER'],
+    password=os.environ['POSTGRES_PASSWORD'],
+    host="postgres_db",  # Это имя контейнера с базой данных
+    port="5432"
+)
 sql = db.cursor()
 
 sql.execute("""CREATE TABLE IF NOT EXISTS words (

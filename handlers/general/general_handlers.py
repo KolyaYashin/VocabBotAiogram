@@ -18,7 +18,11 @@ router = Router()
 
 @router.message(Command(commands=['start']))
 async def proccess_start(message: Message):
-    db = tables.sqlite3.connect('data/words.db')
+    db = tables.psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
+                                 user=os.environ['POSTGRES_USER'],
+                                 password=os.environ['POSTGRES_PASSWORD'],
+                                 host="postgres_db",  # Это имя контейнера с базой данных
+                                 port="5432")
     sql = db.cursor()
     create_empty_user(message.from_user.id)
     user_id = message.from_user.id
@@ -49,7 +53,11 @@ async def proccess_menu(message: Message):
     user_id = message.from_user.id
     create_empty_user(user_id)
     users.user_data[user_id]['state'] = 'in_menu'
-    db = tables.sqlite3.connect('data/words.db')
+    db = tables.psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
+                                 user=os.environ['POSTGRES_USER'],
+                                 password=os.environ['POSTGRES_PASSWORD'],
+                                 host="postgres_db",  # Это имя контейнера с базой данных
+                                 port="5432")
     sql = db.cursor()
     user_rating = int(sql.execute(f'SELECT rating FROM users WHERE user_id={user_id}').fetchone()[0])
     await message.answer(f'Рейтинг - {user_rating}',reply_markup=menu_keyboard)
@@ -59,7 +67,11 @@ async def proccess_menu(message: Message):
 
 @router.message( F.text.startswith('/admin'),f.IsAdmin(admin_ids))
 async def proccess_admin(message: Message, text: str):
-    db = tables.sqlite3.connect('data/words.db')
+    db = tables.psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
+                                 user=os.environ['POSTGRES_USER'],
+                                 password=os.environ['POSTGRES_PASSWORD'],
+                                 host="postgres_db",  # Это имя контейнера с базой данных
+                                 port="5432")
     sql = db.cursor()
     table = sql.execute(f'SELECT * FROM users')
     user_to_delete: int
@@ -69,7 +81,7 @@ async def proccess_admin(message: Message, text: str):
         await message.answer("введи число")
         return
     await message.answer(str(table.fetchmany(5)))
-    if next(sql.execute(f'SELECT COUNT() FROM users WHERE (user_id = {user_to_delete})'))[0]!=0:
+    if next(sql.execute(f'SELECT COUNT() FROM users WHERE (user_id = {user_to_delete})'))[0] != 0:
         with db:
             sql.execute(f'DELETE FROM users WHERE (user_id = {user_to_delete})')
             await message.answer(f'пользователь {user_to_delete} удалён')

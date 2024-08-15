@@ -1,4 +1,5 @@
-import sqlite3
+import psycopg2
+import os
 from data.update_table import update
 
 
@@ -9,7 +10,7 @@ class Word:
     success: int
     coef: int
 
-    def __init__(self,en,ru,total,success,coef):
+    def __init__(self, en, ru, total, success, coef):
         self.en = en
         self.ru = ru
         self.total = total
@@ -17,18 +18,21 @@ class Word:
         self.coef = coef
 
     def __str__(self):
-        return ('Ваше слово - '+self.en+', перевод: '+self.ru  + ' total ' + str(self.total) + ' successful ' +
-                str(self.success)+' coef ' + str(self.coef))
+        return ('Ваше слово - ' + self.en + ', перевод: ' + self.ru + ' total ' + str(self.total) + ' successful ' +
+                str(self.success) + ' coef ' + str(self.coef))
 
 
 class Dictionary:
-
     words: list[Word]
     words_copy: list[Word]
     tag: str
 
     def __init__(self, count: int, name: str, id: int, tag: str):
-        db = sqlite3.connect(name)
+        db = psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
+                              user=os.environ['POSTGRES_USER'],
+                              password=os.environ['POSTGRES_PASSWORD'],
+                              host="postgres_db",  # Это имя контейнера с базой данных
+                              port="5432")
         sql = db.cursor()
         self.words = []
         self.tag = tag
@@ -51,9 +55,9 @@ class Dictionary:
         return ans
 
     def __call__(self):
-        i =- 1
+        i = - 1
         while len(self.words) > 0:
-            i = (i+1) % len(self.words)
+            i = (i + 1) % len(self.words)
             yield self.words[i]
 
     def delete_word(self, ru: str):
@@ -64,14 +68,18 @@ class Dictionary:
         return
 
     def update(self, name, id, rat_dif):
-        db = sqlite3.connect(name)
+        db = psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
+                              user=os.environ['POSTGRES_USER'],
+                              password=os.environ['POSTGRES_PASSWORD'],
+                              host="postgres_db",  # Это имя контейнера с базой данных
+                              port="5432")
         sql = db.cursor()
         for i in range(len(self.words_copy)):
-            word_i= self.words_copy[i]
+            word_i = self.words_copy[i]
             print(f'UPDATE words SET total = {word_i.total}, successful = {word_i.success}, '
-            f'date = DATE("now", "localtime") WHERE en = "{word_i.en}" AND user_id={id}')
+                  f'date = DATE("now", "localtime") WHERE en = "{word_i.en}" AND user_id={id}')
             sql.execute(f'UPDATE words SET total = {word_i.total}, successful = {word_i.success}, '
-            f'date = DATE("now", "localtime") WHERE en = "{word_i.en}" AND user_id={id}')
+                        f'date = DATE("now", "localtime") WHERE en = "{word_i.en}" AND user_id={id}')
             sql.execute(f'UPDATE users SET rating=rating+{rat_dif}')
         db.commit()
         sql.close()

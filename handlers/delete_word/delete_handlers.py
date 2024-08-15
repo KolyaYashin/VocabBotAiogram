@@ -1,3 +1,5 @@
+import os
+
 import data.create_tables as tables
 import data.user_session as users
 from aiogram.filters import Command, Text
@@ -30,7 +32,11 @@ async def start_delete_button(callback: CallbackQuery):
 
 @router.message(F.text,~Text(startswith='/'), f.InDelete(users.user_data))
 async def proccess_put_word_2delete(message: Message):
-    db = tables.sqlite3.connect('data/words.db')
+    db = tables.psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
+                                 user=os.environ['POSTGRES_USER'],
+                                 password=os.environ['POSTGRES_PASSWORD'],
+                                 host="postgres_db",  # Это имя контейнера с базой данных
+                                 port="5432")
     sql = db.cursor()
     user_id = message.from_user.id
     select = sql.execute(f'SELECT * FROM words WHERE en="{message.text.lower()}" AND user_id={user_id}')
@@ -47,7 +53,11 @@ async def proccess_put_word_2delete(message: Message):
 @router.callback_query(Text(text=['yes_pressed_delete']))
 async def proccess_delete_word(callback: CallbackQuery):
     user_id = callback.from_user.id
-    db = tables.sqlite3.connect('data/words.db')
+    db = tables.psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
+                                 user=os.environ['POSTGRES_USER'],
+                                 password=os.environ['POSTGRES_PASSWORD'],
+                                 host="postgres_db",  # Это имя контейнера с базой данных
+                                 port="5432")
     sql = db.cursor()
     en = users.user_data[user_id]['en']
     sql.execute(f'DELETE FROM words WHERE en = "{en}" AND user_id = {user_id}')
