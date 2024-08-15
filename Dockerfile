@@ -2,7 +2,7 @@ FROM python:slim
 
 WORKDIR /home
 
-RUN apt-get update && apt-get install -y git sqlite3
+RUN apt-get update && apt-get install -y git
 
 
 RUN git clone https://github.com/KolyaYashin/VocabBotAiogram.git
