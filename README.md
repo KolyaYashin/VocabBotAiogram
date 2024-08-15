@@ -22,14 +22,32 @@ Telegram API и возможности библиотеки Aiogram. Для со
 
 Инструкция по запуску:
 
-Сначала скачайте docker: sudo apt install docker
+Проверьте наличие docker
+```console
+docker --version
+```
+Скачайте его, если ещё нет: 
+```console
+sudo apt install docker
+```
 
-Скачайте образ через команду: docker pull kolya364/ai_vocab_bot:1
+Скачайте образ через команду: 
+```console
+docker pull kolya364/ai_vocab_bot:1
+```
 
-Создайте место для хранения данных на хосте: docker volume create vocab_data
+Создайте место для хранения данных на хосте: 
+```console
+docker volume create vocab_data
+```
 
 Задайте переменные окружения командами:
+```console
 export MY_TG_ID="your telegram id"
 export TOKEN_VOCAB="API token of your bot"
+```
 
-Запуск контейнера: docker run -d -e TOKEN_VOCAB=$TOKEN_VOCAB -e MY_TG_ID=$MY_TG_ID -v vocab_data:/home/VocabBotAiogram/data --name bot kolya364/ai_vocab_bot:1
+Запуск контейнера: 
+```console
+docker run -d -e TOKEN_VOCAB=$TOKEN_VOCAB -e MY_TG_ID=$MY_TG_ID -v vocab_data:/home/VocabBotAiogram/data --name bot kolya364/ai_vocab_bot:1
+```
