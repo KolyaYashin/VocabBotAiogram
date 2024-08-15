@@ -1,6 +1,5 @@
 import psycopg2
 import os
-import math
 
 C = 0.1
 
@@ -19,6 +18,6 @@ def update(db_name):
         sql.execute(f'UPDATE words SET winrate = CASE WHEN total=0 THEN 0 ELSE'
                     f' CAST(successful AS FLOAT) / CAST(total AS FLOAT) END')
         sql.execute(f'UPDATE words SET coef = SQRT(winrate)*'
-                    f'(1 - TANH({C}*CAST(julianday("now") - julianday(date) AS INT)))')
+                    f"(1 - TANH({C}*CAST(  EXTRACT (DAY FROM CURRENT_DATE - date)   AS INT)))")
     sql.close()
     db.close()
