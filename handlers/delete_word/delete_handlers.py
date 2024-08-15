@@ -10,6 +10,7 @@ from keyboard.buttons import keyboard_yes_no_delete
 
 router = Router()
 
+
 async def start_delete(message: Message, user_id: int):
     create_empty_user(user_id)
     users.user_data[user_id]['state'] = 'in_delete'
@@ -19,6 +20,7 @@ async def start_delete(message: Message, user_id: int):
 @router.message(Command(commands=['delete']))
 async def proccess_start_delete(message: Message):
     await start_delete(message, message.from_user.id)
+
 
 @router.callback_query(Text(text=['to_delete']))
 async def start_delete_button(callback: CallbackQuery):

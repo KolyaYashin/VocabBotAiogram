@@ -5,7 +5,7 @@ import filters.filters as f
 from lexicon.lexicon_ru import LEXICON_RU
 from aiogram.types import Message, CallbackQuery
 from aiogram import Router, F
-#from data.constant import MY_ID_TELEGRAM
+# from data.constant import MY_ID_TELEGRAM
 from data.create_empty import create_empty_user
 import os
 
@@ -14,6 +14,7 @@ global MY_ID_TELEGRAM
 MY_ID_TELEGRAM = os.environ['MY_TG_ID']
 admin_ids = [MY_ID_TELEGRAM]
 router = Router()
+
 
 async def proccess_add(message: Message, user_id: int):
     db = tables.sqlite3.connect('data/words.db')
@@ -26,9 +27,11 @@ async def proccess_add(message: Message, user_id: int):
     sql.close()
     db.close()
 
+
 @router.message(Command(commands=['add']))
 async def proccess_add_command(message: Message):
     await proccess_add(message, message.from_user.id)
+
 
 @router.callback_query(Text(text=['to_add']))
 async def proccess_add_button(callback: CallbackQuery):
@@ -43,6 +46,7 @@ async def proccess_add_en(message: Message):
     users.user_data[user_id]['en'] = en
     users.user_data[user_id]['state'] = 'in_add_ru'
     await message.answer('Введите перевод слова')
+
 
 @router.message(F.text,~Text(startswith='/'), f.InAddRu(users.user_data))
 async def proccess_add_ru(message: Message):
@@ -68,7 +72,7 @@ async def proccess_add_ru(message: Message):
         users.user_data[user_id]['state'] = 'in_add_en'
 
 
-@router.message(F.text,~Text(startswith='/'), f.InAddTag(users.user_data))
+@router.message(F.text, ~Text(startswith='/'), f.InAddTag(users.user_data))
 async def proccess_add_tag(message: Message):
     user_id = message.from_user.id
     tag = message.text.lower()

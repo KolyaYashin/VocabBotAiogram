@@ -4,18 +4,23 @@ from aiogram.types import Message
 
 class IsAdmin(BaseFilter):
     admins_list: list[int] = []
+
     def __init__(self, admins_list):
         self.admins_list = admins_list
+
     async def __call__(self, message: Message):
         txt = message.text.split()
         del txt[0]
         if message.from_user.id in self.admins_list:
             return {'text': " ".join(txt)}
 
+
 class InAddEn(BaseFilter):
     users_dictionary: dict
+
     def __init__(self, users_dict):
         self.users_dictionary = users_dict
+
     async def __call__(self, message: Message):
         user_id = message.from_user.id
         if user_id not in self.users_dictionary:
@@ -26,10 +31,13 @@ class InAddEn(BaseFilter):
             else:
                 return 0
 
+
 class InAddRu(BaseFilter):
     users_dictionary: dict
+
     def __init__(self, users_dict):
         self.users_dictionary = users_dict
+
     async def __call__(self, message: Message):
         user_id = message.from_user.id
         if user_id not in self.users_dictionary:
@@ -40,10 +48,13 @@ class InAddRu(BaseFilter):
             else:
                 return 0
 
+
 class InAddTag(BaseFilter):
     users_dictionary: dict
+
     def __init__(self, users_dict):
         self.users_dictionary = users_dict
+
     async def __call__(self, message: Message):
         user_id = message.from_user.id
         if user_id not in self.users_dictionary:
@@ -57,8 +68,10 @@ class InAddTag(BaseFilter):
 
 class InSettings(BaseFilter):
     users_dictionary: dict
+
     def __init__(self, users_dict):
         self.users_dictionary = users_dict
+
     async def __call__(self, message: Message):
         user_id = message.from_user.id
         if user_id not in self.users_dictionary:
@@ -72,8 +85,10 @@ class InSettings(BaseFilter):
 
 class InDelete(BaseFilter):
     users_dictionary: dict
+
     def __init__(self, users_dict):
         self.users_dictionary = users_dict
+
     async def __call__(self, message: Message):
         user_id = message.from_user.id
         if user_id not in self.users_dictionary:
@@ -84,10 +99,13 @@ class InDelete(BaseFilter):
             else:
                 return 0
 
+
 class InTest(BaseFilter):
     users_dictionary: dict
+
     def __init__(self, users_dict):
         self.users_dictionary = users_dict
+
     async def __call__(self, message: Message):
         user_id = message.from_user.id
         if user_id not in self.users_dictionary:

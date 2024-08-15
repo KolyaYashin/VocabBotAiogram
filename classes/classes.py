@@ -17,7 +17,8 @@ class Word:
         self.coef = coef
 
     def __str__(self):
-        return 'Ваше слово - '+self.en+', перевод: '+self.ru  + ' total ' + str(self.total) + ' successful ' + str(self.success)+' coef ' + str(self.coef)
+        return ('Ваше слово - '+self.en+', перевод: '+self.ru  + ' total ' + str(self.total) + ' successful ' +
+                str(self.success)+' coef ' + str(self.coef))
 
 
 class Dictionary:
@@ -26,26 +27,27 @@ class Dictionary:
     words_copy: list[Word]
     tag: str
 
-    def __init__(self,count:int, name:str, id:int, tag:str):
-        db=sqlite3.connect(name)
+    def __init__(self, count: int, name: str, id: int, tag: str):
+        db = sqlite3.connect(name)
         sql = db.cursor()
         self.words = []
         self.tag = tag
-        select=sql.execute(f'SELECT en,ru,total,successful,coef FROM words WHERE user_id = {id} AND tag LIKE "{tag}" ORDER BY coef ASC')
+        select = sql.execute(f'SELECT en,ru,total,successful,coef FROM words WHERE user_id = {id} AND tag LIKE "{tag}" '
+                             f'ORDER BY coef ASC')
 
         for i in range(count):
-            word=select.fetchone()
+            word = select.fetchone()
             if word is not None:
-                self.words.append(Word(word[0],word[1],word[2],word[3],word[4]))
+                self.words.append(Word(word[0], word[1], word[2], word[3], word[4]))
         self.words_copy = self.words.copy()
         sql.close()
         db.close()
 
     def __str__(self):
-        ans=''
+        ans = ''
         for i in range(len(self.words)):
-            ans+=str(self.words[i])
-            ans+='         ,           '
+            ans += str(self.words[i])
+            ans += '         ,           '
         return ans
 
     def __call__(self):

@@ -16,7 +16,6 @@ admin_ids = [MY_ID_TELEGRAM]
 router = Router()
 
 
-
 @router.message(Command(commands=['start']))
 async def proccess_start(message: Message):
     db = tables.sqlite3.connect('data/words.db')
@@ -31,9 +30,11 @@ async def proccess_start(message: Message):
     sql.close()
     db.close()
 
+
 @router.message(Command(commands=['help']))
 async def proccess_help(message: Message):
     await message.answer(LEXICON_RU['help'])
+
 
 @router.message(Command(commands = ['stop']))
 async def proccess_stop(message: Message):
@@ -41,6 +42,7 @@ async def proccess_stop(message: Message):
     create_empty_user(user_id)
     await message.answer('Операция остановлена. Чтобы выйти в меню нажмите /menu')
     users.user_data[user_id]['state'] = 'in_menu'
+
 
 @router.message(Command(commands = ['menu']))
 async def proccess_menu(message: Message):

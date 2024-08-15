@@ -11,13 +11,10 @@ from keyboard.buttons import keyboard_yes_no_settings
 from data.create_empty import create_empty_user
 
 
-
 global MY_ID_TELEGRAM
 MY_ID_TELEGRAM = os.environ['MY_TG_ID']
 admin_ids = [MY_ID_TELEGRAM]
 router = Router()
-
-
 
 
 @router.message(Command(commands=['tag']), f.InSettings(users.user_data))
@@ -26,10 +23,10 @@ async def proccess_change_incl_tag(message: Message):
                         reply_markup = keyboard_yes_no_settings)
 
 
-
 @router.message(Command(commands=['count']), f.InSettings(users.user_data))
 async def proccess_change_incl_tag(message: Message):
     await message.answer(text = 'Тесты на сколько слов хочешь проходить?')
+
 
 @router.message(lambda message: message.text.isnumeric(), f.InSettings(users.user_data))
 async def isnumeric(message: Message):
@@ -42,7 +39,6 @@ async def isnumeric(message: Message):
     sql.close()
     db.close()
     await message.answer(LEXICON_RU['new_count'] + str(new_count)+'\n'+ LEXICON_RU['back_2menu'])
-
 
 
 @router.callback_query(Text(text=['yes_pressed_settings']), f.InSettings(users.user_data))
@@ -59,6 +55,7 @@ async def proccess_button_yes_press(callback: CallbackQuery):
     users.user_data[user_id]['state'] = 'in_menu'
     await callback.message.answer(LEXICON_RU['back_2menu'])
     await callback.answer()
+
 
 @router.callback_query(Text(text=['no_pressed_settings']), f.InSettings(users.user_data))
 async def proccess_button_yes_press(callback: CallbackQuery):
