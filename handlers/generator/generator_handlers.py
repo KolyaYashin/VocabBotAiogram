@@ -5,19 +5,41 @@ import filters.filters as f
 from lexicon.lexicon_ru import LEXICON_RU
 from aiogram.types import Message, CallbackQuery
 from aiogram import Router, F
+# from data.constant import MY_ID_TELEGRAM
 from data.create_empty import create_empty_user
 import os
+from word2vec_model import model_word2vec
+import numpy as np
 import requests
 from bs4 import BeautifulSoup
 from googletrans import Translator
-from keyboard.buttons import keyboard_yes_no_word
-
-
-
-
+from keyboard.buttons import keyboard_yes_no_generator
 
 router = Router()
 
+
+def find_most_similar_word(words_list, model, words_corpus, ignore_words=None):
+    if ignore_words is None:
+        ignore_words = []
+    embeddings = []
+    for word in words_list:
+        if word not in words_corpus:
+            raise ValueError(f"Слово '{word}' не найдено в модели.")
+        else:
+            embeddings.append(model[word])
+
+    avg_emb = sum(embeddings) / len(embeddings)
+
+    most_similar = (-1, '_')
+
+    for word in words_corpus:
+        if word not in words_list and word not in ignore_words:
+            model_emb = model[word]
+            cos_sim = np.dot(avg_emb, model_emb) / np.linalg.norm(model_emb) / np.linalg.norm(avg_emb)
+            if cos_sim > most_similar[0]:
+                most_similar = (cos_sim, word)
+
+    return most_similar
 
 
 # Функция для поиска определения слова и примеров использования
@@ -116,7 +138,6 @@ def find_word(word, lang='english'):
     answer = ''
     if w['definition'] == 'No definition found':
         another_word = cambridge_find_similar(word)
-        answer += f'Возможно вы имели ввиду слово <b>{another_word}</b>. \n'
         w = get_word_definition(another_word, lang)
     w['translate'] = translate_to_russian(w["word"])
     answer += f'<b>Слово</b>: {w["word"]}. \n<b>Перевод</b>: {w["translate"]}. \n<b>Определение</b>: {w["definition"]}. '
@@ -125,40 +146,48 @@ def find_word(word, lang='english'):
     return answer, w
 
 
-async def proccess_add(message: Message, user_id: int):
-    create_empty_user(user_id)
-    users.user_data[user_id]['state'] = 'in_add_en'
-    await message.answer('Введите слово на английском')
-
-
-@router.message(Command(commands=['add']))
-async def proccess_add_command(message: Message):
-    await proccess_add(message, message.from_user.id)
-
-
-@router.callback_query(Text(text=['to_add']))
-async def proccess_add_button(callback: CallbackQuery):
+@router.callback_query(Text(text=['to_generator']))
+async def proccess_generator(callback: CallbackQuery):
+    users.user_data[callback.from_user.id]['ignore_words'] = []
+    await generate(callback, ignore_words=users.user_data[callback.from_user.id]['ignore_words'])
     await callback.answer()
-    await proccess_add(callback.message, callback.from_user.id)
 
 
-@router.message(F.text, ~Text(startswith='/'), f.InAddEn(users.user_data))
-async def proccess_add_en(message: Message):
-    user_id = message.from_user.id
-    en = message.text.lower()
+
+async def generate(callback: CallbackQuery, ignore_words):
+    user_id = callback.from_user.id
+    db = tables.psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
+                                 user=os.environ['POSTGRES_USER'],
+                                 password=os.environ['POSTGRES_PASSWORD'],
+                                 host=os.environ['POSTGRES_CONTAINER_NAME'],  # Это имя контейнера с базой данных
+                                 port="5432")
+    sql = db.cursor()
+    sql.execute(f'SELECT en FROM words WHERE user_id = {user_id}')
+    words = [item[0] for item in sql.fetchall()]
+    if len(words) == 0:
+        await callback.message.answer('Добавьте своих слов, чтобы генератор мог опираться на ваши интересы\n'
+                                      'Вернуться в /menu')
+        sql.close()
+        db.close()
+        await callback.answer()
+    else:
+        most_similar_word = find_most_similar_word(words, model_word2vec, model_word2vec.index_to_key, ignore_words)[1]
+
+        text, word = find_word(most_similar_word)
+
+        users.user_data[user_id]['en'] = word['word']
+        users.user_data[user_id]['ru'] = word['translate']
+        users.user_data[user_id]['definition'] = word['definition']
+        users.user_data[user_id]['complexity'] = word['complexity']
+
+        await callback.message.answer(text + '\nДобавляем?', reply_markup=keyboard_yes_no_generator)
+        sql.close()
+        db.close()
+        await callback.answer()
 
 
-    text, word = find_word(en)
 
-    users.user_data[user_id]['en'] = word['word']
-    users.user_data[user_id]['ru'] = word['translate']
-    users.user_data[user_id]['definition'] = word['definition']
-    users.user_data[user_id]['complexity'] = word['complexity']
-
-    await message.answer(text + '\nДобавляем?', reply_markup=keyboard_yes_no_word)
-
-
-@router.callback_query(Text(text=['yes_pressed_word']))
+@router.callback_query(Text(text=['yes_pressed_generator']))
 async def proccess_add_word(callback: CallbackQuery):
     user_id = callback.from_user.id
     db = tables.psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
@@ -176,13 +205,16 @@ async def proccess_add_word(callback: CallbackQuery):
     db.close()
     await callback.message.answer(f'Слово <b>{users.user_data[user_id]["en"]}, {users.user_data[user_id]["ru"]}</b>,'
                          ' успешно добавлено!\n'
-                                  'Вы можете либо добавить следующее слово, либо выйти в /menu')
+                                  'Можете выйти в /menu')
     await callback.answer()
-    users.user_data[user_id]['state'] = 'in_add_en'
 
 
-@router.callback_query(Text(text=['no_pressed_word']))
+@router.callback_query(Text(text=['no_pressed_generator']))
 async def proccess_next_word(callback: CallbackQuery):
-    await callback.message.answer('Введите другое слово:')
+    user_id = callback.from_user.id
+    users.user_data[user_id]['ignore_words'].append(users.user_data[user_id]['en'])
+    await callback.message.answer('Сейчас сгенерирую другое слово')
+    await generate(callback, ignore_words=users.user_data[callback.from_user.id]['ignore_words'])
     await callback.answer()
+
 

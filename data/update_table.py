@@ -4,15 +4,13 @@ import os
 C = 0.1
 
 
-def update(db_name):
+def update():
     db = psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
                           user=os.environ['POSTGRES_USER'],
                           password=os.environ['POSTGRES_PASSWORD'],
                           host=os.environ['POSTGRES_CONTAINER_NAME'],  # Это имя контейнера с базой данных
                           port="5432")
-    # db.create_function('sqrt', 1, math.sqrt)
 
-    # db.create_function('tanh', 1, math.tanh)
     sql = db.cursor()
     with db:
         # Обновляем winrate
