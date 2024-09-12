@@ -39,8 +39,8 @@ async def proccess_put_word_2delete(message: Message):
                                  port="5432")
     sql = db.cursor()
     user_id = message.from_user.id
-    select = sql.execute(f'SELECT * FROM words WHERE en="{message.text.lower()}" AND user_id={user_id}')
-    if select.fetchone() is None:
+    sql.execute(f'SELECT * FROM words WHERE en="{message.text.lower()}" AND user_id={user_id}')
+    if sql.fetchone() is None:
         await message.answer(LEXICON_RU['havent_found'])
     else:
         await message.answer(LEXICON_RU['you_sure'],

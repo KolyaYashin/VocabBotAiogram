@@ -1,12 +1,14 @@
 FROM python:slim
 
-WORKDIR /home
-
 
 WORKDIR /home/ai_vocab_bot
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
+
+
+COPY word2vec_model_loader.py .
+RUN python3 word2vec_model_loader.py
 
 #COPY . .
 

@@ -7,6 +7,13 @@ button_no_settings = InlineKeyboardButton(text=LEXICON_RU['no'], callback_data='
 keyboard_yes_no_settings = InlineKeyboardMarkup(inline_keyboard=[[button_yes_settings,button_no_settings]])
 
 
+
+button_yes_word = InlineKeyboardButton(text=LEXICON_RU['yes'], callback_data='yes_pressed_word')
+button_no_word = InlineKeyboardButton(text=LEXICON_RU['no'], callback_data='no_pressed_word')
+
+keyboard_yes_no_word = InlineKeyboardMarkup(inline_keyboard=[[button_yes_word, button_no_word]])
+
+
 button_yes_delete = InlineKeyboardButton(text=LEXICON_RU['yes'], callback_data='yes_pressed_delete')
 button_no_delete = InlineKeyboardButton(text=LEXICON_RU['no'], callback_data='no_pressed_delete')
 
@@ -22,3 +29,7 @@ for i in range(len(callbacks)):
                         InlineKeyboardButton(text=texts[i][1], callback_data=callbacks[i][1])])
 
 menu_keyboard = InlineKeyboardMarkup(inline_keyboard=menu_buttons)
+
+
+
+
