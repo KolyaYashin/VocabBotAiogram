@@ -19,11 +19,12 @@ async def proccess_add(message: Message, user_id: int):
     db = tables.psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
                                  user=os.environ['POSTGRES_USER'],
                                  password=os.environ['POSTGRES_PASSWORD'],
-                                 host="postgres_db",  # Это имя контейнера с базой данных
+                                 host=os.environ['POSTGRES_CONTAINER_NAME'],  # Это имя контейнера с базой данных
                                  port="5432")
     sql = db.cursor()
     create_empty_user(user_id)
-    incl_tag = next(sql.execute(f"SELECT include_tag FROM users WHERE user_id={user_id}"))[0]
+    sql.execute(f"SELECT include_tag FROM users WHERE user_id={user_id}")
+    incl_tag = next(sql)[0]
     users.user_data[user_id]['include_tag'] = int(incl_tag)
     users.user_data[user_id]['state'] = 'in_add_en'
     await message.answer('Введите слово на английском')
@@ -64,7 +65,7 @@ async def proccess_add_ru(message: Message):
         db = tables.psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
                                      user=os.environ['POSTGRES_USER'],
                                      password=os.environ['POSTGRES_PASSWORD'],
-                                     host="postgres_db",  # Это имя контейнера с базой данных
+                                     host=os.environ['POSTGRES_CONTAINER_NAME'],  # Это имя контейнера с базой данных
                                      port="5432")
         sql = db.cursor()
         sql.execute(f'INSERT INTO words VALUES ({user_id}, "{users.user_data[user_id]["en"]}", '
@@ -84,10 +85,10 @@ async def proccess_add_tag(message: Message):
     user_id = message.from_user.id
     tag = message.text.lower()
     users.user_data[user_id]['tag'] = tag
-    db = tables.sqlite3.connect(dbname=os.environ['POSTGRES_DB'],
+    db = tables.psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
                                 user=os.environ['POSTGRES_USER'],
                                 password=os.environ['POSTGRES_PASSWORD'],
-                                host="postgres_db",  # Это имя контейнера с базой данных
+                                host=os.environ['POSTGRES_CONTAINER_NAME'],  # Это имя контейнера с базой данных
                                 port="5432")
     sql = db.cursor()
     sql.execute(f'INSERT INTO words VALUES ( {user_id}, "{users.user_data[user_id]["en"]}", '

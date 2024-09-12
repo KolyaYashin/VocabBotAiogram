@@ -35,7 +35,7 @@ async def proccess_put_word_2delete(message: Message):
     db = tables.psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
                                  user=os.environ['POSTGRES_USER'],
                                  password=os.environ['POSTGRES_PASSWORD'],
-                                 host="postgres_db",  # Это имя контейнера с базой данных
+                                 host=os.environ['POSTGRES_CONTAINER_NAME'],  # Это имя контейнера с базой данных
                                  port="5432")
     sql = db.cursor()
     user_id = message.from_user.id
@@ -56,7 +56,7 @@ async def proccess_delete_word(callback: CallbackQuery):
     db = tables.psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
                                  user=os.environ['POSTGRES_USER'],
                                  password=os.environ['POSTGRES_PASSWORD'],
-                                 host="postgres_db",  # Это имя контейнера с базой данных
+                                 host=os.environ['POSTGRES_CONTAINER_NAME'],  # Это имя контейнера с базой данных
                                  port="5432")
     sql = db.cursor()
     en = users.user_data[user_id]['en']

@@ -10,6 +10,6 @@ def create_empty_user(user_id: int):
             'score': 0,
             'state': 'in_menu',
             'words_in_test': 5,
-            'include_tag': 1,
+            'include_tag': 0,
             'test_dictionary': []
         }

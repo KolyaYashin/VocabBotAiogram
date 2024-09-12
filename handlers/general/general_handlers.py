@@ -21,14 +21,15 @@ async def proccess_start(message: Message):
     db = tables.psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
                                  user=os.environ['POSTGRES_USER'],
                                  password=os.environ['POSTGRES_PASSWORD'],
-                                 host="postgres_db",  # Это имя контейнера с базой данных
+                                 host=os.environ['POSTGRES_CONTAINER_NAME'],  # Это имя контейнера с базой данных
                                  port="5432")
     sql = db.cursor()
     create_empty_user(message.from_user.id)
     user_id = message.from_user.id
     count = sql.execute(f'SELECT COUNT(*) FROM users WHERE user_id={user_id}')
-    if next(count)[0]==0:
-        sql.execute(f'INSERT INTO users VALUES ({user_id}, 0, 0, 0, 1000, 5, 0)')
+    if count is None:
+    #if next(count)[0]==0:
+        sql.execute(f"INSERT INTO users VALUES ({user_id}, 0, 0, 0, 1000, 5, 0, 0)")
         db.commit()
     await message.answer(LEXICON_RU['welcome'])
     sql.close()
@@ -56,34 +57,37 @@ async def proccess_menu(message: Message):
     db = tables.psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
                                  user=os.environ['POSTGRES_USER'],
                                  password=os.environ['POSTGRES_PASSWORD'],
-                                 host="postgres_db",  # Это имя контейнера с базой данных
+                                 host=os.environ['POSTGRES_CONTAINER_NAME'],  # Это имя контейнера с базой данных
                                  port="5432")
     sql = db.cursor()
-    user_rating = int(sql.execute(f'SELECT rating FROM users WHERE user_id={user_id}').fetchone()[0])
-    await message.answer(f'Рейтинг - {user_rating}',reply_markup=menu_keyboard)
+    sql.execute(f'SELECT rating FROM users WHERE user_id={user_id}')
+    user_rating = int(sql.fetchone()[0])
+    await message.answer(f'Рейтинг - {user_rating}', reply_markup=menu_keyboard)
     sql.close()
     db.close()
 
 
-@router.message( F.text.startswith('/admin'),f.IsAdmin(admin_ids))
+@router.message( F.text.startswith('/admin'), f.IsAdmin(admin_ids))
 async def proccess_admin(message: Message, text: str):
     db = tables.psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
                                  user=os.environ['POSTGRES_USER'],
                                  password=os.environ['POSTGRES_PASSWORD'],
-                                 host="postgres_db",  # Это имя контейнера с базой данных
+                                 host=os.environ['POSTGRES_CONTAINER_NAME'],  # Это имя контейнера с базой данных
                                  port="5432")
     sql = db.cursor()
-    table = sql.execute(f'SELECT * FROM users')
+    sql.execute(f'SELECT * FROM users')
     user_to_delete: int
     try:
         user_to_delete = int(text)
     except ValueError as e:
         await message.answer("введи число")
         return
-    await message.answer(str(table.fetchmany(5)))
-    if next(sql.execute(f'SELECT COUNT() FROM users WHERE (user_id = {user_to_delete})'))[0] != 0:
+    await message.answer(str(sql.fetchmany(5)))
+    sql.execute(f'SELECT COUNT() FROM users WHERE (user_id = {user_to_delete})')
+    if next(sql)[0] != 0:
         with db:
             sql.execute(f'DELETE FROM users WHERE (user_id = {user_to_delete})')
+            sql.commit()
             await message.answer(f'пользователь {user_to_delete} удалён')
     else:
         await message.answer('такого пользователя нет')

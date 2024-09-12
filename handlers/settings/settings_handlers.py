@@ -25,7 +25,7 @@ async def proccess_change_incl_tag(message: Message):
 
 @router.message(Command(commands=['count']), f.InSettings(users.user_data))
 async def proccess_change_incl_tag(message: Message):
-    await message.answer(text = 'Тесты на сколько слов хочешь проходить?')
+    await message.answer(text = 'Какие по длине тесты ты хочешь проходить?')
 
 
 @router.message(lambda message: message.text.isnumeric(), f.InSettings(users.user_data))
@@ -35,7 +35,7 @@ async def isnumeric(message: Message):
     db = tables.psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
                                  user=os.environ['POSTGRES_USER'],
                                  password=os.environ['POSTGRES_PASSWORD'],
-                                 host="postgres_db",  # Это имя контейнера с базой данных
+                                 host=os.environ['POSTGRES_CONTAINER_NAME'],  # Это имя контейнера с базой данных
                                  port="5432")
     sql = db.cursor()
     sql.execute(f'UPDATE users SET set_test_words = {new_count} WHERE user_id = {user_id}')
@@ -51,7 +51,7 @@ async def proccess_button_yes_press(callback: CallbackQuery):
     db = tables.psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
                                  user=os.environ['POSTGRES_USER'],
                                  password=os.environ['POSTGRES_PASSWORD'],
-                                 host="postgres_db",  # Это имя контейнера с базой данных
+                                 host=os.environ['POSTGRES_CONTAINER_NAME'],  # Это имя контейнера с базой данных
                                  port="5432")
     sql = db.cursor()
     users.user_data[user_id]['include_tag'] = 1
@@ -71,7 +71,7 @@ async def proccess_button_yes_press(callback: CallbackQuery):
     db = tables.psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
                                  user=os.environ['POSTGRES_USER'],
                                  password=os.environ['POSTGRES_PASSWORD'],
-                                 host="postgres_db",  # Это имя контейнера с базой данных
+                                 host=os.environ['POSTGRES_CONTAINER_NAME'],  # Это имя контейнера с базой данных
                                  port="5432")
     sql = db.cursor()
     users.user_data[user_id]['include_tag'] = 0
@@ -91,7 +91,7 @@ async def start_settings(message: Message, user_id: int):
     db = tables.psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
                                  user=os.environ['POSTGRES_USER'],
                                  password=os.environ['POSTGRES_PASSWORD'],
-                                 host="postgres_db",  # Это имя контейнера с базой данных
+                                 host=os.environ['POSTGRES_CONTAINER_NAME'],  # Это имя контейнера с базой данных
                                  port="5432")
     sql = db.cursor()
     query = next(sql.execute(f'SELECT set_test_words AS words, include_tag AS tag FROM users WHERE user_id = {user_id}'))
