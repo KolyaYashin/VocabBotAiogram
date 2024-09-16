@@ -8,8 +8,14 @@ from aiogram.types import Message, CallbackQuery
 from aiogram import Router, F
 from classes.classes import Dictionary
 from data.update_table import update
+import psycopg2
+import os
+
+
+
 
 router = Router()
+
 
 def make_wr(tot, cor):
     if tot==0:
@@ -17,23 +23,23 @@ def make_wr(tot, cor):
     else:
         return cor/tot
 
-async def test_start(message: Message, user_id: int, from_callback: bool):
-    update('data/words.db')
-    db = tables.sqlite3.connect('data/words.db')
+async def test_start(message: Message, user_id: int):
+    update()
+    db = psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
+                          user=os.environ['POSTGRES_USER'],
+                          password=os.environ['POSTGRES_PASSWORD'],
+                          host=os.environ['POSTGRES_CONTAINER_NAME'],  # Это имя контейнера с базой данных
+                          port="5432")
     sql = db.cursor()
-    try:
-        test_tag = message.text.split(' ', 1)[1]
-    except IndexError:
-        test_tag = '%'
-    if from_callback:
-        test_tag = '%'
-    count = next(sql.execute(f'SELECT set_test_words FROM users WHERE user_id={user_id}'))[0]
+    sql.execute(f'SELECT set_test_words FROM users WHERE user_id={user_id}')
+    count = next(sql)[0]
     create_empty_user(user_id)
-    user_data[user_id]['test_dictionary'] = Dictionary(count, 'data/words.db', user_id, test_tag)
-    print(test_tag)
+    user_data[user_id]['test_dictionary'] = Dictionary(count, user_id)
     user_data[user_id]['test_gen'] = user_data[user_id]['test_dictionary']()
     if len(user_data[user_id]['test_dictionary'].words) == 0:
         await message.answer(LEXICON_RU['no_words']+LEXICON_RU['back_2menu'])
+        sql.close()
+        db.close()
     else:
         user_data[user_id]['current_word'] = next(user_data[user_id]['test_gen'])
         user_data[user_id]['state'] = 'in_test'
@@ -45,14 +51,17 @@ async def test_start(message: Message, user_id: int, from_callback: bool):
         await message.answer(LEXICON_RU['test_start'] + str(len(user_data[user_id]['test_dictionary'].words)))
         await message.answer(LEXICON_RU['word_in_en']+(user_data[user_id]['current_word'].en))
 
+
 @router.message(Command(commands=['test']))
 async def start_test(message:Message):
-    await test_start(message, message.from_user.id, 0)
+    await test_start(message, message.from_user.id)
+
 
 @router.callback_query(Text(text=['to_test']))
 async def start_test_button(callback: CallbackQuery):
     await callback.answer()
-    await test_start(callback.message, callback.from_user.id, 1)
+    await test_start(callback.message, callback.from_user.id)
+
 
 
 @router.message(f.InTest(user_data), Command(commands=['stop']))
@@ -61,7 +70,7 @@ async def stop_in_test(message: Message):
     await message.answer(LEXICON_RU['test_ended']+
     str(make_wr(user_data[user_id]['total'],user_data[user_id]['correct'])))
     await message.answer(LEXICON_RU['back_2menu'])
-    user_data[user_id]['test_dictionary'].update('data/words.db', user_id, user_data[user_id]['rating_diff'])
+    user_data[user_id]['test_dictionary'].update(user_id, user_data[user_id]['rating_diff'])
 
 
 @router.message(F.text,~Text(startswith='/'), f.InTest(user_data))
@@ -84,7 +93,7 @@ async def check_word(message: Message):
             await message.answer(LEXICON_RU['test_ended']+
             str("%.2f"%make_wr(user_data[user_id]['total'],user_data[user_id]['correct'])))
             await message.answer(LEXICON_RU['back_2menu'])
-            user_data[user_id]['test_dictionary'].update('data/words.db', user_id, user_data[user_id]['rating_diff'])
+            user_data[user_id]['test_dictionary'].update(user_id, user_data[user_id]['rating_diff'])
     else:
         user_data[user_id]['rating_diff']-=5
         await message.answer(LEXICON_RU['wrong_answer']+real_translate+LEXICON_RU['rating_minus'])

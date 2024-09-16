@@ -39,7 +39,7 @@ async def proccess_put_word_2delete(message: Message):
                                  port="5432")
     sql = db.cursor()
     user_id = message.from_user.id
-    sql.execute(f'SELECT * FROM words WHERE en="{message.text.lower()}" AND user_id={user_id}')
+    sql.execute(f"SELECT * FROM words WHERE en='{message.text.lower()}' AND user_id={user_id}")
     if sql.fetchone() is None:
         await message.answer(LEXICON_RU['havent_found'])
     else:
@@ -60,7 +60,7 @@ async def proccess_delete_word(callback: CallbackQuery):
                                  port="5432")
     sql = db.cursor()
     en = users.user_data[user_id]['en']
-    sql.execute(f'DELETE FROM words WHERE en = "{en}" AND user_id = {user_id}')
+    sql.execute(f"DELETE FROM words WHERE en = '{en}' AND user_id = {user_id}")
     db.commit()
     sql.close()
     db.close()
@@ -73,5 +73,5 @@ async def proccess_delete_word(callback: CallbackQuery):
 async def proccess_exit(callback: CallbackQuery):
     user_id = callback.from_user.id
     await callback.message.answer(LEXICON_RU['stoped'])
-    users.user_data[user_id]['state']= 'in_menu'
+    users.user_data[user_id]['state'] = 'in_menu'
     await callback.answer()

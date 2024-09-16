@@ -26,9 +26,8 @@ async def proccess_start(message: Message):
     sql = db.cursor()
     create_empty_user(message.from_user.id)
     user_id = message.from_user.id
-    count = sql.execute(f'SELECT COUNT(*) FROM users WHERE user_id={user_id}')
-    if count is None:
-    #if next(count)[0]==0:
+    sql.execute(f'SELECT COUNT(*) FROM users WHERE user_id={user_id}')
+    if sql.fetchone()[0]==0:
         sql.execute(f"INSERT INTO users VALUES ({user_id}, 0, 0, 0, 1000, 5, 0, 0)")
         db.commit()
     await message.answer(LEXICON_RU['welcome'])
