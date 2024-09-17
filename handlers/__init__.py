@@ -4,3 +4,4 @@ from handlers.settings import settings_handlers
 from handlers.delete_word import delete_handlers
 from handlers.test import test_handlers
 from handlers.generator import generator_handlers
+from handlers.ai import ai_handlers

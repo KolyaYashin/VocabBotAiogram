@@ -1,4 +1,3 @@
-import data.create_tables as tables
 from data.user_session import user_data
 from data.create_empty import create_empty_user
 from aiogram.filters import Command, Text

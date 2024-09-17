@@ -109,6 +109,7 @@ async def proccess_prune(callback: CallbackQuery):
     sql.close()
     db.close()
     await callback.message.answer('Ваш словарь успешно удален! \nВыйти в /menu')
+    await callback.answer()
 
 
 @router.callback_query(Text(text=['to_download']))

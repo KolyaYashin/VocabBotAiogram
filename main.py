@@ -16,4 +16,5 @@ if __name__ == '__main__':
     dp.include_router(handlers.test_handlers.router)
     dp.include_router(handlers.general_handlers.router)
     dp.include_router(handlers.generator_handlers.router)
+    dp.include_router(handlers.ai_handlers.router)
     dp.run_polling(bot)
