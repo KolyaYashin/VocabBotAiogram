@@ -1,14 +1,15 @@
 import os
-
 import data.create_tables as tables
 import data.user_session as users
-from aiogram.filters import Command
+from aiogram.filters import Command, Text
 import filters.filters as f
 from lexicon.lexicon_ru import LEXICON_RU
-from aiogram.types import Message
+from aiogram.types import Message, CallbackQuery, FSInputFile
 from aiogram import Router, F
 from data.create_empty import create_empty_user
 from keyboard.buttons import menu_keyboard
+import csv
+
 
 global MY_ID_TELEGRAM
 MY_ID_TELEGRAM = os.environ['MY_TG_ID']
@@ -92,3 +93,54 @@ async def proccess_admin(message: Message, text: str):
         await message.answer('такого пользователя нет')
     sql.close()
     db.close()
+
+
+@router.callback_query(Text(text=['to_prune']))
+async def proccess_prune(callback: CallbackQuery):
+    await callback.message.answer('Происходит очистка вашего словаря ...')
+    db = tables.psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
+                                 user=os.environ['POSTGRES_USER'],
+                                 password=os.environ['POSTGRES_PASSWORD'],
+                                 host=os.environ['POSTGRES_CONTAINER_NAME'],  # Это имя контейнера с базой данных
+                                 port="5432")
+    sql = db.cursor()
+    sql.execute(f'DELETE FROM words WHERE user_id={callback.from_user.id}')
+    db.commit()
+    sql.close()
+    db.close()
+    await callback.message.answer('Ваш словарь успешно удален! \nВыйти в /menu')
+
+
+@router.callback_query(Text(text=['to_download']))
+async def proccess_csv(callback: CallbackQuery):
+    db = tables.psycopg2.connect(dbname=os.environ['POSTGRES_DB'],
+                                 user=os.environ['POSTGRES_USER'],
+                                 password=os.environ['POSTGRES_PASSWORD'],
+                                 host=os.environ['POSTGRES_CONTAINER_NAME'],  # Это имя контейнера с базой данных
+                                 port="5432")
+    sql = db.cursor()
+    sql.execute(f'SELECT en, ru, definition, complexity FROM words WHERE user_id={callback.from_user.id}')
+    rows = sql.fetchall()
+
+    print(rows)
+
+    # Определяем путь к файлу CSV
+    csv_file = f'words_data_{callback.from_user.id}.csv'
+
+
+
+    # Записываем данные в файл CSV
+    with open(csv_file, 'w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow(['english', 'russian', 'definition', 'complexity'])  # Заголовки колонок
+
+        for row in rows:
+            writer.writerow([str(val) for val in row])
+
+    sql.close()
+    db.close()
+    await callback.message.answer('Ваш файл собран:')
+    await callback.message.answer_document(FSInputFile(csv_file))
+    await callback.message.answer('Выйти в /menu')
+    os.remove(csv_file)
+    await callback.answer()

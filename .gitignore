@@ -9,3 +9,4 @@ just_test.ipynb
 .idea/
 run.sh
 *.model*
+*.csv
