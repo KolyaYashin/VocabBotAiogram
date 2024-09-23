@@ -30,13 +30,13 @@ model = genai.GenerativeModel("gemini-1.5-flash", generation_config=generation_c
 
 def get_prompt(mode, words):
     if mode==0:
-        prompt = str("let's have a little conversation. try to use B2 words."
-             " you have to start any conversetion topics for yourself. " 
+        prompt = str("let's have a little conversation. try to use B2 words. " 
             f"in each subsequent message, you must use one of these words {words} in given order. start using these words by first message."
              "you should highlight this word using <b>word</b>. also try to use these words in most common context. "
-             "stop conversation and say 'thanks for the conversation, goodbye' when words will be ended. "
+             f"after you response {len(words)} times,you have to stop conversation and "
+             "say 'thanks for the conversation, goodbye'. "
             "messages should contain some question. after each of my answers, "
-            "at first rate  how my answer is logically related to your message, just by one number: 0 or 1"
+            "at first rate how my answer is logically related to your message, just by one number: 0 or 1"
              " and then generate your sentence. separate these parts by |")
     else:
         prompt = ''
@@ -99,6 +99,7 @@ async def proccess_message_ai(message: Message):
     if (split_response[1].endswith('goodbye.\n')
         or split_response[1].endswith('goodbye.')
         or split_response[1].endswith('goodbye')
+        or split_response[1].endswith('goodbye!')
         or user_data[user_id]['total'] > len(user_data[user_id]['words'])):
         
         user_data[user_id]['state'] = 'in_menu'

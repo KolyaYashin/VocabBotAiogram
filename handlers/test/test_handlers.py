@@ -48,7 +48,7 @@ async def test_start(message: Message, user_id: int):
         sql.close()
         db.close()
         await message.answer(LEXICON_RU['test_start'] + str(len(user_data[user_id]['test_dictionary'].words)))
-        await message.answer(LEXICON_RU['word_in_en']+(user_data[user_id]['current_word'].en))
+        await message.answer(LEXICON_RU['word_in_en']+f"<b>{user_data[user_id]['current_word'].en}</b>")
 
 
 @router.message(Command(commands=['test']))
@@ -87,14 +87,14 @@ async def check_word(message: Message):
         user_data[user_id]['test_dictionary'].delete_word(real_translate)
         try:
             user_data[user_id]['current_word'] = next(user_data[user_id]['test_gen'])
-            await message.answer(LEXICON_RU['next_word']+(user_data[user_id]['current_word'].en))
+            await message.answer(LEXICON_RU['next_word']+f"<b>{user_data[user_id]['current_word'].en}</b>")
         except StopIteration:
             await message.answer(LEXICON_RU['test_ended']+
-            str("%.2f"%make_wr(user_data[user_id]['total'],user_data[user_id]['correct'])))
+            str(make_wr(user_data[user_id]['total'],user_data[user_id]['correct'])*100.0)+'%')
             await message.answer(LEXICON_RU['back_2menu'])
             user_data[user_id]['test_dictionary'].update(user_id, user_data[user_id]['rating_diff'])
     else:
         user_data[user_id]['rating_diff']-=5
         await message.answer(LEXICON_RU['wrong_answer']+real_translate+LEXICON_RU['rating_minus'])
         user_data[user_id]['current_word'] = next(user_data[user_id]['test_gen'])
-        await message.answer(LEXICON_RU['next_word']+(user_data[user_id]['current_word'].en))
+        await message.answer(LEXICON_RU['next_word']+user_data[user_id]['current_word'].en)

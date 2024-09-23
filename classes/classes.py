@@ -82,7 +82,8 @@ class Dictionary:
                   f"date = CURRENT_DATE WHERE en = '{word_i.en}' AND user_id={user_id}")
             sql.execute(f'UPDATE words SET total = {word_i.total}, successful = {word_i.success}, '
                         f"date = CURRENT_DATE WHERE en = '{word_i.en}' AND user_id={user_id}")
-            sql.execute(f'UPDATE users SET rating=rating+{rat_dif}')
+
+        sql.execute(f'UPDATE users SET rating=rating+{rat_dif}')
         db.commit()
         sql.close()
         db.close()
